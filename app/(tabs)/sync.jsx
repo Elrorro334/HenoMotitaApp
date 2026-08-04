@@ -142,30 +142,60 @@ export default function SyncScreen() {
 
             for (const item of items) {
               try {
-                // 1. Create Tree
-                const treeRes = await createTree(crewId, {
-                  code: item.treeCode || item.treeId || `ARB-UTTT-${Math.floor(Math.random() * 1000)}`,
-                  commonName: item.species || 'Mezquite',
-                  scientificName: 'Prosopis laevigata',
-                  latitude: item.latitude || 20.0551,
-                  longitude: item.longitude || -99.3407,
-                  locationDescription: item.zone ? `${item.zone}, ${item.municipality || 'Tula'}` : 'Campus UTTT Tula-Tepeji',
-                });
+                let treeId = null;
+                const targetCode = (item.treeCode || item.treeId || `ARB-UTTT-${Math.floor(Math.random() * 1000)}`).trim();
 
-                const treeId = treeRes.id || treeRes._id;
+                // 1. Check if tree already exists in backend crew list to prevent duplicate tree error
+                try {
+                  const existingTreesRes = await getTreesByCrew(crewId).catch(() => []);
+                  const treeList = Array.isArray(existingTreesRes) ? existingTreesRes : (existingTreesRes.trees || existingTreesRes.data || []);
+                  const foundTree = treeList.find(t => (t.code || t.treeCode || '').toLowerCase() === targetCode.toLowerCase());
+                  if (foundTree) {
+                    treeId = foundTree.id || foundTree._id;
+                  }
+                } catch (e) {
+                  console.warn('Error checking existing trees:', e);
+                }
+
+                // If not found, create new tree
+                if (!treeId) {
+                  try {
+                    const treeRes = await createTree(crewId, {
+                      code: targetCode,
+                      commonName: item.species || 'Mezquite',
+                      scientificName: item.species === 'Huizache' ? 'Acacia farnesiana' : 'Prosopis laevigata',
+                      latitude: item.latitude || 20.0551,
+                      longitude: item.longitude || -99.3407,
+                      locationDescription: item.zone ? `${item.zone}, ${item.municipality || 'Tula'}` : 'Campus UTTT Tula-Tepeji',
+                    });
+                    treeId = treeRes?.id || treeRes?._id || treeRes?.tree?.id || treeRes?.tree?._id || treeRes?.data?.id || treeRes?.data?._id;
+                  } catch (createErr) {
+                    // If creation failed due to duplicate, try fetching list again
+                    const refetchedTrees = await getTreesByCrew(crewId).catch(() => []);
+                    const treeList = Array.isArray(refetchedTrees) ? refetchedTrees : (refetchedTrees.trees || refetchedTrees.data || []);
+                    const found = treeList.find(t => (t.code || t.treeCode || '').toLowerCase() === targetCode.toLowerCase());
+                    if (found) {
+                      treeId = found.id || found._id;
+                    }
+                  }
+                }
+
+                if (!treeId) {
+                  throw new Error(`No se pudo generar el identificador para el árbol ${targetCode}`);
+                }
 
                 // 2. Create Observation
                 const obsRes = await createObservation(treeId, {
-                  lowerThirdScore: item.lowerThirdScore ?? 1,
-                  middleThirdScore: item.middleThirdScore ?? 1,
-                  upperThirdScore: item.upperThirdScore ?? 1,
+                  lowerThirdScore: item.lowerThirdScore ?? 0,
+                  middleThirdScore: item.middleThirdScore ?? 0,
+                  upperThirdScore: item.upperThirdScore ?? 0,
                   notes: item.comments || 'Sincronizado desde cola offline HenoTrack.',
-                  observationDate: item.date || new Date().toISOString(),
+                  observationDate: item.date || item.createdAt || new Date().toISOString(),
                   latitude: item.latitude || 20.0551,
                   longitude: item.longitude || -99.3407,
                 });
 
-                const obsId = obsRes.id || obsRes._id;
+                const obsId = obsRes?.id || obsRes?._id || obsRes?.observation?.id || obsRes?.observation?._id || obsRes?.data?.id || obsRes?.data?._id;
 
                 // 3. Upload Image if available
                 if (item.imageUri && obsId) {
