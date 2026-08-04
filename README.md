@@ -12,10 +12,16 @@ Una aplicación móvil nativa desarrollada con **React Native** y **Expo** dise�
 
 - 🌿 **Onboarding Interactivo & Slider Gamificado**: Guía paso a paso sobre biología, peligro y soluciones del Heno Motita sin emojis, ofreciendo dopamina visual e intuitiva para los usuarios.
 - ⏰ **Lógica Horaria Dinámica (5 Fases)**: 100 frases motivacionales de monitoreo ambiental segmentadas por la hora local del dispositivo (Madrugada, Mañana, Mediodía, Tarde, Noche) e interpoladas con el nombre del usuario.
-- 📸 **Captura Fotográfica de Doseles**: Integración con `expo-camera` para fotografías del árbol en 3 tercios de severidad (Hawksworth).
+- 📸 **Cámara Pro HenoTrack 3.0**:
+  - Visor reticular HUD con guías esquineras turquesas y badges de cristal para tercios Hawksworth.
+  - Controles de Flash (On/Off/Auto), conmutador de cuadrícula y rotación de cámara.
+  - Panel de telemetría GPS en tiempo real con precisión en metros y obturador metálico esmeralda.
 - 📍 **Geolocalización Automática**: Coordenadas GPS en tiempo real etiquetadas en cada observación de campo.
-- 🛡️ **Almacenamiento Seguro Resiliente (`safeStorage`)**: Capa de abstracción tolerante a fallos que conmuta automáticamente entre AsyncStorage, `localStorage` o `memoryStore`.
-- 🔄 **Modo Offline & Sincronización Batch**: Permite guardar observaciones sin red e irlas sincronizando en bloque al recuperar la conectividad.
+- 🛡️ **Almacenamiento Seguro Resiliente (`safeStorage`)**: Capa de abstracción tolerante a fallos que conmuta automáticamente entre AsyncStorage, `localStorage` o `memoryStore` (SQLite en dispositivos Android/iOS).
+- 🔄 **Sincronización Batch & Edición Offline**: 
+  - Visualización y edición en caliente de reportes en cola antes de sincronizar (código de árbol, especie, tercios y notas).
+  - Resolución transparente de duplicados 409 cuando el árbol ya existe en el servidor API.
+- ⌨️ **Teclado Adaptativo (`KeyboardAvoidingView`)**: Desplazamiento inteligente para evitar que el teclado cubra los campos de entrada de observaciones.
 - 🔒 **Sanitización de Errores e Interfaz Pública**: Experiencia libre de jergas técnicas, nombres de bases de datos o enlaces de repositorio. Alertas de error traducidas en español amigable sin códigos HTTP crudos.
 
 ---
@@ -26,10 +32,10 @@ Una aplicación móvil nativa desarrollada con **React Native** y **Expo** dise�
 - **Toolchain**: Expo SDK (~54.0.0)
 - **Navegación**: Expo Router (~6.0.24)
 - **Componentes UI**: React Native Paper (^5.15.3) & `@expo/vector-icons`
-- **Almacenamiento**: `@react-native-async-storage/async-storage` + `safeStorage` fallback
+- **Almacenamiento**: `@react-native-async-storage/async-storage` (SQLite) + `safeStorage` fallback
 - **Hardware APIs**: 
-  - `expo-camera` (Captura de evidencias)
-  - `expo-location` (Servicios GPS)
+  - `expo-camera` (Captura de evidencias fotográficas)
+  - `expo-location` (Servicios GPS y telemetría)
 
 ---
 
@@ -49,8 +55,8 @@ npm install
 # Compilar e instalar directamente en un teléfono conectado por USB o emulador:
 npx react-native run-android
 
-# Generar el ejecutable nativo instalable (.apk):
-npm run build:android
+# Ver los logs en tiempo real de la app desde PowerShell:
+npx react-native log-android
 ```
 *El ejecutable binario `.apk` quedará ubicado en `android/app/build/outputs/apk/debug/app-debug.apk`*
 
@@ -64,8 +70,8 @@ HenoMotitaApp/
 ├── app/                  # Rutas y pantallas de la app (Expo Router)
 │   ├── (tabs)/           # Navegación por pestañas (dashboard, history, sync, profile)
 │   ├── index.jsx         # Splash, Onboarding Slider y Login/Activación Dinámico
-│   ├── camera.jsx        # Visor de cámara GPS
-│   └── results.jsx       # Evaluación de Hawksworth por tercios
+│   ├── camera.jsx        # Visor de cámara pro HUD con telemetría GPS
+│   └── results.jsx       # Formulario adaptativo de evaluación Hawksworth
 ├── components/           # Componentes reutilizables (EvaluationCard, ThirdsOverlay)
 ├── context/              # AuthContext y manejo global de sesión
 ├── services/             # API client, safeStorage, offlineStore y timePhrases
