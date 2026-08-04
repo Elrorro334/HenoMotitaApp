@@ -4,16 +4,36 @@
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)
 
-Una aplicación móvil nativa desarrollada con **React Native** y **Expo** diseñada para la evaluación, monitoreo ambiental y recolección de datos sobre la infestación de *Heno Motita* (*Tillandsia recurvata*) en los doseles de los árboles en el Valle del Mezquital (UTTT).
+Aplicación móvil fitosanitaria oficial desarrollada por **Estudiantes de Tecnologías de la Información de la Universidad Tecnológica del Valle del Mezquital (UTTT)** para el proyecto institucional de investigación científica sobre el monitoreo y control del *Heno Motita* (*Tillandsia recurvata*).
+
+---
+
+## 🔬 Proyecto de Investigación Institucional
+
+- **Institución Sede**: Universidad Tecnológica del Valle del Mezquital (UTTT)
+- **Docentes Investigadoras Lideres**: Dra. Marisol Reséndiz & Mtra. Odi
+- **Desarrollo Tecnológico**: Estudiantes de Tecnologías de la Información (UTTT)
+- **Frecuencia de Monitoreo**: Levantamiento de datos en campo cada 15 días.
+- **Escala de Evaluación**: Hawksworth Fitosanitario por Tercios (Nivel 0 a 6).
+- **Especies Arbóreas Evaluadas**: Huizaches, Mezquites, Nopales y especies vulnerables con presencia de plaga.
+- **Alcance Geográfico (8 Municipios de Hidalgo)**:
+  1. **Tula de Allende** (UTTT)
+  2. **Tepeji del Río** (UTTT)
+  3. **Atitalaquia** (UTTT)
+  4. **Tlaxcoapan** (UTTT)
+  5. **Tepetitlán** (CECYTE)
+  6. **Tezontepec de Aldama** (CETAC 2)
+  7. **Atotonilco de Tula** (COBAEH)
+  8. **Tlahuelilpan** (UAEH)
 
 ---
 
 ## 📋 Características Principales
 
-- 🌿 **Onboarding Interactivo & Slider Gamificado**: Guía paso a paso sobre biología, peligro y soluciones del Heno Motita sin emojis, ofreciendo dopamina visual e intuitiva para los usuarios.
+- 🌿 **Onboarding Interactivo & Slider Gamificado**: Guía informativa paso a paso sobre biología, impacto ecológico y técnicas de remoción del Heno Motita sin emojis.
 - ⏰ **Lógica Horaria Dinámica (5 Fases)**: 100 frases motivacionales de monitoreo ambiental segmentadas por la hora local del dispositivo (Madrugada, Mañana, Mediodía, Tarde, Noche) e interpoladas con el nombre del usuario.
 - 📸 **Cámara Pro HenoTrack 3.0**:
-  - Visor reticular HUD con guías esquineras turquesas y badges de cristal para tercios Hawksworth.
+  - Visor reticular HUD con guías esquineras turquesas y badges para tercios Hawksworth.
   - Controles de Flash (On/Off/Auto), conmutador de cuadrícula y rotación de cámara.
   - Panel de telemetría GPS en tiempo real con precisión en metros y obturador metálico esmeralda.
 - 📍 **Geolocalización Automática**: Coordenadas GPS en tiempo real etiquetadas en cada observación de campo.
@@ -22,7 +42,7 @@ Una aplicación móvil nativa desarrollada con **React Native** y **Expo** dise�
   - Visualización y edición en caliente de reportes en cola antes de sincronizar (código de árbol, especie, tercios y notas).
   - Resolución transparente de duplicados 409 cuando el árbol ya existe en el servidor API.
 - ⌨️ **Teclado Adaptativo (`KeyboardAvoidingView`)**: Desplazamiento inteligente para evitar que el teclado cubra los campos de entrada de observaciones.
-- 🔒 **Sanitización de Errores e Interfaz Pública**: Experiencia libre de jergas técnicas, nombres de bases de datos o enlaces de repositorio. Alertas de error traducidas en español amigable sin códigos HTTP crudos.
+- 🔒 **Sanitización de Errores e Interfaz Pública**: Experiencia libre de jergas técnicas o enlaces crudos. Alertas traducidas en español amigable.
 
 ---
 
@@ -62,25 +82,6 @@ npx react-native log-android
 
 ---
 
-## 📂 Estructura del Proyecto
-
-```text
-HenoMotitaApp/
-├── android/              # Código y configuración nativa de Android (Gradle, Kotlin, C++)
-├── app/                  # Rutas y pantallas de la app (Expo Router)
-│   ├── (tabs)/           # Navegación por pestañas (dashboard, history, sync, profile)
-│   ├── index.jsx         # Splash, Onboarding Slider y Login/Activación Dinámico
-│   ├── camera.jsx        # Visor de cámara pro HUD con telemetría GPS
-│   └── results.jsx       # Formulario adaptativo de evaluación Hawksworth
-├── components/           # Componentes reutilizables (EvaluationCard, ThirdsOverlay)
-├── context/              # AuthContext y manejo global de sesión
-├── services/             # API client, safeStorage, offlineStore y timePhrases
-├── config.js             # Variables de entorno e identificadores
-└── package.json          # Scripts y dependencias del proyecto
-```
-
----
-
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia estándar definida en el archivo `LICENSE`.
+Este proyecto está bajo la Licencia MIT estándar definida en el archivo [`LICENSE`](./LICENSE), preservando los derechos de autor de la **Universidad Tecnológica del Valle del Mezquital (UTTT)** y el equipo de investigación de la **Dra. Marisol Reséndiz** y la **Mtra. Odi**.

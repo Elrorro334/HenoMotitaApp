@@ -50,11 +50,11 @@ export default function ProfileScreen() {
         
         {/* Role Badge */}
         <View style={styles.roleBadge}>
-          <Ionicons name="leaf" size={14} color="#16A34A" style={{ marginRight: 5 }} />
+          <Ionicons name="leaf" size={14} color="#176B52" style={{ marginRight: 5 }} />
           <Text style={styles.userRole}>{getRoleTitle(user?.role)}</Text>
         </View>
 
-        <Text style={styles.userInst}>UNIVERSIDAD TECNOLÓGICA DE TULA-TEPEJI</Text>
+        <Text style={styles.userInst}>UNIVERSIDAD TECNOLÓGICA DEL VALLE DEL MEZQUITAL (UTTT)</Text>
         <Text style={styles.userEmail}>{user?.email || 'Servidor Heno Motita'}</Text>
         
         {user?.enrollment && (
@@ -64,14 +64,14 @@ export default function ProfileScreen() {
 
       {/* Active Crew Info */}
       <View style={styles.sectionHeader}>
-        <Ionicons name="people" size={20} color="#16A34A" style={{ marginRight: 6 }} />
+        <Ionicons name="people" size={20} color="#176B52" style={{ marginRight: 6 }} />
         <Text style={styles.sectionTitle}>Cuadrilla Activa de Trabajo</Text>
       </View>
 
       <View style={styles.infoCard}>
         <View style={styles.infoRow}>
           <View style={styles.infoIconBox}>
-            <Ionicons name="location" size={20} color="#16A34A" />
+            <Ionicons name="location" size={20} color="#176B52" />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.infoTitle}>{activeCrew?.name || activeCrew?.code || 'Cuadrilla Campus UTTT'}</Text>
@@ -83,26 +83,64 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* System Information */}
+      {/* Institutional Research Project Info */}
       <View style={styles.sectionHeader}>
-        <Ionicons name="shield-checkmark-outline" size={20} color="#176B52" style={{ marginRight: 6 }} />
-        <Text style={styles.sectionTitle}>Información de la Aplicación</Text>
+        <Ionicons name="flask-outline" size={20} color="#176B52" style={{ marginRight: 6 }} />
+        <Text style={styles.sectionTitle}>Proyecto de Investigación UTTT</Text>
       </View>
 
       <View style={styles.infoCard}>
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Sistema:</Text>
-          <Text style={styles.specVal}>HenoTrack Móvil v1.0</Text>
+          <Text style={styles.specLabel}>Investigación:</Text>
+          <Text style={styles.specVal}>Monitoreo y Control Fitosanitario de Heno Motita (*Tillandsia recurvata*)</Text>
         </View>
         <Divider style={{ marginVertical: 8 }} />
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Estado de Conexión:</Text>
-          <Text style={styles.specVal}>Servicio Activo</Text>
+          <Text style={styles.specLabel}>Docentes Lideres:</Text>
+          <Text style={styles.specVal}>Dra. Marisol Reséndiz & Mtra. Odi</Text>
         </View>
         <Divider style={{ marginVertical: 8 }} />
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Institución:</Text>
-          <Text style={styles.specVal}>UTTT - Valle del Mezquital</Text>
+          <Text style={styles.specLabel}>Desarrollo:</Text>
+          <Text style={styles.specVal}>Estudiantes de Tecnologías de la Información (UTTT)</Text>
+        </View>
+        <Divider style={{ marginVertical: 8 }} />
+        <View style={styles.specRow}>
+          <Text style={styles.specLabel}>Municipios (8):</Text>
+          <Text style={styles.specVal}>Tula, Tepeji, Atitalaquia, Tlaxcoapan, Tepetitlán, Tezontepec, Tlahuelilpan, Atotonilco</Text>
+        </View>
+        <Divider style={{ marginVertical: 8 }} />
+        <View style={styles.specRow}>
+          <Text style={styles.specLabel}>Especies Evaluadas:</Text>
+          <Text style={styles.specVal}>Mezquites, Huizaches, Nopales y especies infestadas</Text>
+        </View>
+        <Divider style={{ marginVertical: 8 }} />
+        <View style={styles.specRow}>
+          <Text style={styles.specLabel}>Red de Instituciones:</Text>
+          <Text style={styles.specVal}>UTTT, CECYTE, CETAC 2, COBAEH, UAEH</Text>
+        </View>
+        <Divider style={{ marginVertical: 8 }} />
+        <View style={styles.specRow}>
+          <Text style={styles.specLabel}>Frecuencia de Inspección:</Text>
+          <Text style={styles.specVal}>Cada 15 Días (Escala Hawksworth 0 a 6)</Text>
+        </View>
+      </View>
+
+      {/* System Specifications */}
+      <View style={styles.sectionHeader}>
+        <Ionicons name="shield-checkmark-outline" size={20} color="#176B52" style={{ marginRight: 6 }} />
+        <Text style={styles.sectionTitle}>Metadatos del Sistema</Text>
+      </View>
+
+      <View style={styles.infoCard}>
+        <View style={styles.specRow}>
+          <Text style={styles.specLabel}>Aplicación Móvil:</Text>
+          <Text style={styles.specVal}>HenoTrack v1.0 (Bare Native)</Text>
+        </View>
+        <Divider style={{ marginVertical: 8 }} />
+        <View style={styles.specRow}>
+          <Text style={styles.specLabel}>Estado de Servicio:</Text>
+          <Text style={styles.specVal}>Conexión Activa a Plataforma Central</Text>
         </View>
       </View>
 
@@ -119,7 +157,7 @@ export default function ProfileScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[styles.menuText, { color: '#DC2626' }]}>Cerrar Sesión</Text>
-            <Text style={styles.menuSub}>Desconectar token JWT y salir</Text>
+            <Text style={styles.menuSub}>Desconectar token JWT y salir del sistema</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color="#DC2626" />
         </TouchableOpacity>
@@ -157,10 +195,10 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#16A34A',
+    backgroundColor: '#176B52',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#16A34A',
+    shadowColor: '#176B52',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -179,60 +217,57 @@ const styles = StyleSheet.create({
   roleBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#EDF6F1',
     paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 14,
+    paddingVertical: 4,
+    borderRadius: 12,
     marginTop: 6,
+    marginBottom: 8,
   },
   userRole: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#16A34A',
+    color: '#176B52',
   },
   userInst: {
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '800',
     color: '#64748B',
-    marginTop: 6,
-    fontWeight: '700',
+    textAlign: 'center',
+    letterSpacing: 0.5,
   },
   userEmail: {
-    fontSize: 12,
-    color: '#64748B',
+    fontSize: 13,
+    color: '#334155',
     marginTop: 2,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   userEnrollment: {
     fontSize: 12,
-    color: '#0284C7',
+    color: '#64748B',
     marginTop: 2,
     fontWeight: '700',
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 20,
-    marginBottom: 10,
+    paddingHorizontal: 20,
     marginTop: 12,
+    marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#163029',
   },
   infoCard: {
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
-    borderRadius: 20,
     padding: 16,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 2,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   infoRow: {
     flexDirection: 'row',
@@ -241,8 +276,8 @@ const styles = StyleSheet.create({
   infoIconBox: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#DCFCE7',
+    borderRadius: 10,
+    backgroundColor: '#EDF6F1',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -266,53 +301,55 @@ const styles = StyleSheet.create({
   statusPillText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#16A34A',
+    color: '#15803D',
   },
   specRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   specLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
     color: '#64748B',
+    flex: 1,
   },
   specVal: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '800',
     color: '#0F172A',
+    flex: 2,
+    textAlign: 'right',
   },
   menuContainer: {
-    marginHorizontal: 16,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    marginHorizontal: 16,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     overflow: 'hidden',
+    marginBottom: 12,
   },
   menuItem: {
-    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 14,
   },
   menuIconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#DCFCE7',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
+    marginRight: 12,
   },
   menuText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontWeight: '800',
   },
   menuSub: {
     fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
+    color: '#94A3B8',
+    marginTop: 1,
   },
 });
