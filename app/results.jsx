@@ -100,8 +100,8 @@ export default function ResultsScreen() {
       }
 
       Alert.alert(
-        '¡Registro HenoTrack Guardado!',
-        `La inspección del árbol ${treeCode} (Valoración ${totalScore}/6) ha sido almacenada en MongoDB Atlas.`,
+        '¡Registro Guardado!',
+        `La inspección del árbol ${treeCode} (Valoración ${totalScore}/6) se registró exitosamente en el sistema HenoTrack.`,
         [{ text: 'Aceptar', onPress: () => router.replace('/(tabs)/dashboard') }]
       );
     } catch (error) {

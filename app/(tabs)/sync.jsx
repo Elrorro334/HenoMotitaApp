@@ -43,8 +43,8 @@ export default function SyncScreen() {
     }
 
     Alert.alert(
-      'Enviar Registros al Servidor HenoTrack',
-      `¿Deseas enviar ${items.length} evaluaciones almacenadas localmente al servidor institucional en Render?`,
+      'Enviar Registros al Sistema HenoTrack',
+      `¿Deseas enviar ${items.length} evaluaciones almacenadas localmente a la plataforma HenoTrack?`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -98,7 +98,7 @@ export default function SyncScreen() {
             setSyncing(false);
 
             if (errorCount === 0) {
-              setSnackbarMsg(`¡Se sincronizaron exitosamente ${successCount} registros con MongoDB Atlas!`);
+              setSnackbarMsg(`¡Se sincronizaron exitosamente ${successCount} registros en la plataforma!`);
             } else {
               setSnackbarMsg(`Se enviaron ${successCount} registros. ${errorCount} no pudieron procesarse.`);
             }
@@ -135,7 +135,7 @@ export default function SyncScreen() {
           <Ionicons name="cloud-upload" size={14} color="#176B52" style={{ marginRight: 4 }} />
           <Text style={styles.badgeText}>Sincronización HenoTrack · Offline First</Text>
         </View>
-        <Text style={styles.title}>Transmisión a Servidor API</Text>
+        <Text style={styles.title}>Sincronización de Datos</Text>
         <Text style={styles.subtitle}>
           Inspecciones guardadas en almacenamiento local cuando no hay conexión a internet.
         </Text>
@@ -154,7 +154,7 @@ export default function SyncScreen() {
             </View>
             <Text style={styles.emptyTitle}>Todo Sincronizado</Text>
             <Text style={styles.emptySubtitle}>
-              No hay inspecciones pendientes en tu dispositivo. Todas las capturas de campo están almacenadas en el servidor de MongoDB Atlas.
+              No hay inspecciones pendientes en tu dispositivo. Todas las capturas de campo están almacenadas al corriente en el sistema HenoTrack.
             </Text>
           </View>
         ) : (

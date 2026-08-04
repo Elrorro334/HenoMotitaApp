@@ -1,2 +1,2 @@
-// Mock data removed. App is connected live to https://heno-motita.onrender.com
+// Live connection initialized
 export const mockDataRemoved = true;

@@ -78,6 +78,33 @@ async function request(endpoint, options = {}) {
 
     const data = await response.json().catch(() => ({}));
 
+// User-friendly error message sanitizer to ensure no technical terms, HTTP codes, or DB details leak to the UI
+function sanitizeErrorMessage(rawMessage, status) {
+  const msg = (typeof rawMessage === 'string' ? rawMessage : '').toLowerCase();
+  
+  if (status === 401 || msg.includes('unauthorized') || msg.includes('token') || msg.includes('jwt')) {
+    return 'Tu sesión o credenciales no son válidas. Por favor inicia sesión nuevamente.';
+  }
+  if (status === 403 || msg.includes('forbidden') || msg.includes('permis')) {
+    return 'No tienes permisos para realizar esta acción.';
+  }
+  if (status === 404 || msg.includes('not found')) {
+    return 'La información solicitada no estuvo disponible.';
+  }
+  if (status === 408 || msg.includes('timeout') || msg.includes('abort')) {
+    return 'Tiempo de espera agotado. Por favor verifica tu conexión a internet e intentalo de nuevo.';
+  }
+  if (status >= 500 || msg.includes('gin') || msg.includes('gorm') || msg.includes('sql') || msg.includes('database') || msg.includes('render') || msg.includes('server')) {
+    return 'El servicio no se encuentra disponible temporalmente. Intenta nuevamente en unos momentos.';
+  }
+  
+  if (typeof rawMessage === 'string' && rawMessage.trim() && !msg.includes('http') && !msg.includes('render') && !msg.includes('github') && !msg.includes('api')) {
+    return rawMessage;
+  }
+
+  return 'Ocurrió un inconveniente al procesar la solicitud. Por favor intenta de nuevo.';
+}
+
     if (response.status === 401) {
       // Auto cleanup expired session
       await setStoredToken(null);
@@ -85,8 +112,9 @@ async function request(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-      const errorMessage = data?.error || data?.message || data?.details || data?.msg || `Error del servidor (${response.status})`;
-      const error = new Error(errorMessage);
+      const rawMsg = data?.error || data?.message || data?.details || data?.msg || '';
+      const cleanMessage = sanitizeErrorMessage(rawMsg, response.status);
+      const error = new Error(cleanMessage);
       error.status = response.status;
       error.data = data;
       throw error;
@@ -96,12 +124,15 @@ async function request(endpoint, options = {}) {
   } catch (err) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      const timeoutError = new Error('Tiempo de espera agotado al conectar con el servidor HenoTrack (15s)');
+      const timeoutError = new Error('Tiempo de espera agotado. Por favor verifica tu conexión a internet.');
       timeoutError.status = 408;
       throw timeoutError;
     }
     if (!err.status) {
       err.status = 0; // Network connection failure
+      err.message = 'No se pudo conectar a la red. Verifica tu conexión a internet e intentalo nuevamente.';
+    } else {
+      err.message = sanitizeErrorMessage(err.message, err.status);
     }
     throw err;
   }

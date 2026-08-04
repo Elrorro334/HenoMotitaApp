@@ -83,26 +83,26 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Backend Server Specs */}
+      {/* System Information */}
       <View style={styles.sectionHeader}>
-        <Ionicons name="server" size={20} color="#0284C7" style={{ marginRight: 6 }} />
-        <Text style={styles.sectionTitle}>Servidor y Almacenamiento Central</Text>
+        <Ionicons name="shield-checkmark-outline" size={20} color="#176B52" style={{ marginRight: 6 }} />
+        <Text style={styles.sectionTitle}>Información de la Aplicación</Text>
       </View>
 
       <View style={styles.infoCard}>
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Backend REST API:</Text>
-          <Text style={styles.specVal}>https://heno-motita.onrender.com</Text>
+          <Text style={styles.specLabel}>Sistema:</Text>
+          <Text style={styles.specVal}>HenoTrack Móvil v1.0</Text>
         </View>
         <Divider style={{ marginVertical: 8 }} />
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Base de Datos:</Text>
-          <Text style={styles.specVal}>MongoDB Atlas Cloud</Text>
+          <Text style={styles.specLabel}>Estado de Conexión:</Text>
+          <Text style={styles.specVal}>Servicio Activo</Text>
         </View>
         <Divider style={{ marginVertical: 8 }} />
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Repositorio Git:</Text>
-          <Text style={styles.specVal}>Padrinox3x / Heno_Motita</Text>
+          <Text style={styles.specLabel}>Institución:</Text>
+          <Text style={styles.specVal}>UTTT - Valle del Mezquital</Text>
         </View>
       </View>
 

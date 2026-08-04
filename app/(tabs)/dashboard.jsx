@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { getTreesByCrew, getObservationsByTree } from '../../services/api';
 import EvaluationCard from '../../components/EvaluationCard';
+import { getRandomPhrase } from '../../services/timePhrases';
+
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -59,18 +61,31 @@ export default function DashboardScreen() {
     }
   }, [activeCrew, crews]);
 
+  const studentName = user?.name || user?.email || 'Alumno Inspector';
+  const studentInitials = studentName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  const [welcomePhrase, setWelcomePhrase] = useState('');
+
   useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData]);
+
+  useEffect(() => {
+    if (studentName) {
+      const firstName = studentName.split(' ')[0];
+      setWelcomePhrase(getRandomPhrase('post-login', firstName));
+    }
+  }, [studentName]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await refreshCrews(user);
     await loadDashboardData();
+    if (studentName) {
+      const firstName = studentName.split(' ')[0];
+      setWelcomePhrase(getRandomPhrase('post-login', firstName));
+    }
   };
 
-  const studentName = user?.name || user?.email || 'Alumno Inspector';
-  const studentInitials = studentName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
   const lastObsScore = recentEvaluations.length > 0 
     ? (recentEvaluations[0]?.hawksworth?.totalScore ?? 0) 
@@ -92,8 +107,9 @@ export default function DashboardScreen() {
 
           <Text style={styles.heroGreeting}>Hola, {studentName.split(' ')[0]}.</Text>
           <Text style={styles.heroSub}>
-            Tus registros están al corriente. Consulta tus árboles, fotografías, observaciones y entregas quincenales.
+            {welcomePhrase || 'Tus registros estan al corriente. Consulta tus arboles, fotografias, observaciones y entregas quincenales.'}
           </Text>
+
 
           {/* Student Profile Card */}
           <View style={styles.studentProfileBadge}>
@@ -229,14 +245,14 @@ export default function DashboardScreen() {
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color="#176B52" />
-            <Text style={styles.loadingText}>Conectando con la API HenoTrack...</Text>
+            <Text style={styles.loadingText}>Cargando información...</Text>
           </View>
         ) : recentEvaluations.length === 0 ? (
           <View style={styles.emptyCard}>
             <Ionicons name="leaf-outline" size={40} color="#687A74" style={{ marginBottom: 8 }} />
-            <Text style={styles.emptyTitle}>Sin Inspecciones en la API</Text>
+            <Text style={styles.emptyTitle}>Sin Inspecciones Registradas</Text>
             <Text style={styles.emptySub}>
-              Aún no has enviado capturas de campo al servidor de MongoDB. Presiona "Nueva Inspección" para comenzar.
+              Aún no has registrado capturas de campo en la plataforma. Presiona "Nueva Inspección" para comenzar.
             </Text>
           </View>
         ) : (
