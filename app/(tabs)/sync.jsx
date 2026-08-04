@@ -32,18 +32,18 @@ export default function SyncScreen() {
 
   const handleSync = async () => {
     if (items.length === 0) {
-      Alert.alert('Sincronización UTTT', 'No hay registros offline pendientes por sincronizar.');
+      Alert.alert('Sincronización HenoTrack', 'No hay registros offline pendientes por transmitir.');
       return;
     }
 
     const crewId = activeCrew?.id || activeCrew?._id || (crews && crews[0] ? (crews[0].id || crews[0]._id) : null);
     if (!crewId) {
-      Alert.alert('Sesión Requerida', 'Debes iniciar sesión con una cuenta y cuadrilla activa para enviar registros al servidor central.');
+      Alert.alert('Sesión Requerida', 'Debes iniciar sesión con una cuenta de alumno y cuadrilla activa para transmitir registros.');
       return;
     }
 
     Alert.alert(
-      'Enviar Registros al Servidor',
+      'Enviar Registros al Servidor HenoTrack',
       `¿Deseas enviar ${items.length} evaluaciones almacenadas localmente al servidor institucional en Render?`,
       [
         { text: 'Cancelar', style: 'cancel' },
@@ -61,9 +61,9 @@ export default function SyncScreen() {
                   code: item.treeCode || item.treeId || `ARB-UTTT-${Math.floor(Math.random() * 1000)}`,
                   commonName: item.species || 'Mezquite',
                   scientificName: 'Prosopis laevigata',
-                  latitude: item.latitude || 20.0500,
-                  longitude: item.longitude || -99.3400,
-                  locationDescription: 'Campus UTTT Tula-Tepeji',
+                  latitude: item.latitude || 20.0551,
+                  longitude: item.longitude || -99.3407,
+                  locationDescription: item.zone ? `${item.zone}, ${item.municipality || 'Tula'}` : 'Campus UTTT Tula-Tepeji',
                 });
 
                 const treeId = treeRes.id || treeRes._id;
@@ -73,10 +73,10 @@ export default function SyncScreen() {
                   lowerThirdScore: item.lowerThirdScore ?? 1,
                   middleThirdScore: item.middleThirdScore ?? 1,
                   upperThirdScore: item.upperThirdScore ?? 1,
-                  notes: item.comments || 'Sincronizado desde cola offline.',
+                  notes: item.comments || 'Sincronizado desde cola offline HenoTrack.',
                   observationDate: item.date || new Date().toISOString(),
-                  latitude: item.latitude || 20.0500,
-                  longitude: item.longitude || -99.3400,
+                  latitude: item.latitude || 20.0551,
+                  longitude: item.longitude || -99.3407,
                 });
 
                 const obsId = obsRes.id || obsRes._id;
@@ -98,14 +98,29 @@ export default function SyncScreen() {
             setSyncing(false);
 
             if (errorCount === 0) {
-              setSnackbarMsg(`¡${successCount} registros transmitidos con éxito al servidor UTTT!`);
-              setSnackbarVisible(true);
+              setSnackbarMsg(`¡Se sincronizaron exitosamente ${successCount} registros con MongoDB Atlas!`);
             } else {
-              Alert.alert(
-                'Sincronización Parcial',
-                `Se enviaron ${successCount} registros. ${errorCount} registros fallaron y se mantuvieron en la cola offline.`
-              );
+              setSnackbarMsg(`Se enviaron ${successCount} registros. ${errorCount} no pudieron procesarse.`);
             }
+            setSnackbarVisible(true);
+          },
+        },
+      ]
+    );
+  };
+
+  const handleClearAll = async () => {
+    Alert.alert(
+      'Vaciar Cola Offline',
+      '¿Deseas eliminar todos los borradores locales? Esta acción no se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Vaciar Todo',
+          style: 'destructive',
+          onPress: async () => {
+            await clearPendingQueue();
+            await loadQueue();
           },
         },
       ]
@@ -114,86 +129,92 @@ export default function SyncScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header Info Box */}
-      <View style={styles.headerCard}>
-        <View style={styles.headerIconCircle}>
-          <Ionicons name="cloud-upload-outline" size={26} color="#16A34A" />
+      {/* Header Intro */}
+      <View style={styles.headerBanner}>
+        <View style={styles.badgeRow}>
+          <Ionicons name="cloud-upload" size={14} color="#176B52" style={{ marginRight: 4 }} />
+          <Text style={styles.badgeText}>Sincronización HenoTrack · Offline First</Text>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Evaluaciones Almacenadas Localmente</Text>
-          <Text style={styles.headerSub}>
-            Registros realizados sin conexión a internet en el campus UTTT listos para su envío a MongoDB Atlas.
-          </Text>
-        </View>
+        <Text style={styles.title}>Transmisión a Servidor API</Text>
+        <Text style={styles.subtitle}>
+          Inspecciones guardadas en almacenamiento local cuando no hay conexión a internet.
+        </Text>
       </View>
 
-      <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#16A34A" />
-            <Text style={{ color: '#64748B', marginTop: 8, fontSize: 13 }}>Consultando registros en almacenamiento local...</Text>
+            <ActivityIndicator size="small" color="#176B52" />
+            <Text style={{ color: '#687A74', marginTop: 8, fontSize: 12 }}>Consultando cola offline local...</Text>
           </View>
         ) : items.length === 0 ? (
           <View style={styles.emptyStateContainer}>
             <View style={styles.emptyIconCircle}>
-              <Ionicons name="checkmark-done-circle" size={48} color="#16A34A" />
+              <Ionicons name="cloud-done" size={40} color="#176B52" />
             </View>
-            <Text style={styles.emptyTitle}>Sincronización Completa</Text>
+            <Text style={styles.emptyTitle}>Todo Sincronizado</Text>
             <Text style={styles.emptySubtitle}>
-              Todos los datos registrados en el dispositivo han sido transmitidos exitosamente al servidor central de la UTTT.
+              No hay inspecciones pendientes en tu dispositivo. Todas las capturas de campo están almacenadas en el servidor de MongoDB Atlas.
             </Text>
           </View>
         ) : (
-          <View style={{ gap: 10 }}>
-            <Text style={styles.pendingSectionTitle}>
-              Registros Pendientes de Envío ({items.length})
-            </Text>
+          <>
+            <View style={styles.summaryBar}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="documents-outline" size={18} color="#176B52" style={{ marginRight: 6 }} />
+                <Text style={styles.summaryText}>{items.length} Pendiente{items.length > 1 ? 's' : ''} de Envío</Text>
+              </View>
+
+              <Button mode="text" onPress={handleClearAll} textColor="#C75B52" compact labelStyle={{ fontSize: 12 }}>
+                Vaciar Cola
+              </Button>
+            </View>
 
             {items.map((item) => (
-              <Card key={item.id} style={styles.card} mode="contained">
+              <Card key={item.id} style={styles.card} elevation={1}>
                 <Card.Content style={styles.cardContent}>
                   <View style={styles.cardRow}>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.treeIdText}>Código: {item.treeCode || item.treeId}</Text>
+                      <Text style={styles.treeIdText}>{item.treeCode || item.treeId || 'Sin Código'}</Text>
                       <Text style={styles.dateText}>
-                        Caputra: {new Date(item.createdAt || item.date).toLocaleString('es-MX')}
+                        {new Date(item.createdAt || item.date).toLocaleString('es-MX')} · {item.species || 'Mezquite'}
                       </Text>
                     </View>
 
                     <View style={styles.scaleBadge}>
-                      <Text style={styles.scaleText}>Hawksworth: {item.scale} / 6</Text>
+                      <Text style={styles.scaleText}>Hawksworth {item.scale ?? (item.lowerThirdScore + item.middleThirdScore + item.upperThirdScore)}/6</Text>
                     </View>
                   </View>
                 </Card.Content>
               </Card>
             ))}
-          </View>
+          </>
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          mode="contained" 
-          onPress={handleSync}
-          loading={syncing}
-          disabled={syncing || items.length === 0}
-          style={[
-            styles.syncButton, 
-            { backgroundColor: items.length > 0 ? '#16A34A' : '#CBD5E1' }
-          ]}
-          labelStyle={{ fontSize: 15, fontWeight: '800' }}
-          contentStyle={{ paddingVertical: 8 }}
-          icon={() => <Ionicons name="cloud-upload-outline" size={20} color="#FFFFFF" />}
-        >
-          {syncing ? 'Transmitiendo a Servidor...' : `Enviar Registros al Servidor (${items.length})`}
-        </Button>
-      </View>
+      {items.length > 0 && (
+        <View style={styles.footer}>
+          <Button
+            mode="contained"
+            onPress={handleSync}
+            loading={syncing}
+            disabled={syncing}
+            buttonColor="#176B52"
+            style={styles.syncButton}
+            labelStyle={{ fontWeight: '900', fontSize: 15 }}
+            contentStyle={{ paddingVertical: 8 }}
+            icon={() => <Ionicons name="cloud-upload" size={20} color="#FFFFFF" />}
+          >
+            Transmitir {items.length} Registro{items.length > 1 ? 's' : ''} a la API
+          </Button>
+        </View>
+      )}
 
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
-        duration={3500}
-        style={{ borderRadius: 14, backgroundColor: '#16A34A' }}
+        duration={4000}
+        style={{ backgroundColor: '#103F32' }}
       >
         {snackbarMsg}
       </Snackbar>
@@ -204,60 +225,63 @@ export default function SyncScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F4F8F5',
   },
-  headerCard: {
-    padding: 18,
+  headerBanner: {
     backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 2,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderColor: '#DCE7E1',
+  },
+  badgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#EDF6F1',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
   },
-  headerIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#DCFCE7',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-  },
-  headerTitle: {
-    fontSize: 16,
+  badgeText: {
+    fontSize: 11,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#176B52',
   },
-  headerSub: {
+  title: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#163029',
+  },
+  subtitle: {
     fontSize: 12,
-    color: '#64748B',
-    marginTop: 3,
-    fontWeight: '500',
+    color: '#687A74',
+    marginTop: 2,
     lineHeight: 16,
   },
-  list: {
-    paddingHorizontal: 16,
-    paddingTop: 14,
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 32,
   },
-  pendingSectionTitle: {
-    fontSize: 15,
+  summaryBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  summaryText: {
+    fontSize: 14,
     fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 4,
+    color: '#163029',
   },
   card: {
+    marginBottom: 10,
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DCE7E1',
   },
   cardContent: {
     padding: 14,
@@ -270,15 +294,15 @@ const styles = StyleSheet.create({
   treeIdText: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#163029',
   },
   dateText: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#687A74',
     marginTop: 2,
   },
   scaleBadge: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FFF5DF',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
@@ -286,7 +310,7 @@ const styles = StyleSheet.create({
   scaleText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#D97706',
+    color: '#D99A28',
   },
   loadingContainer: {
     alignItems: 'center',
@@ -302,19 +326,19 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#EDF6F1',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '900',
+    color: '#163029',
   },
   emptySubtitle: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#687A74',
     textAlign: 'center',
     marginTop: 6,
     fontWeight: '500',
@@ -325,11 +349,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    shadowColor: '#0F172A',
+    shadowColor: '#103F32',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
     elevation: 6,
+    borderWidth: 1,
+    borderColor: '#DCE7E1',
   },
   syncButton: {
     borderRadius: 16,

@@ -1,5 +1,5 @@
 import { API_BASE_URL, API_ROOT_URL } from '../config';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { safeStorage } from './storage';
 
 const TOKEN_STORAGE_KEY = '@heno_motita_token';
 const USER_STORAGE_KEY = '@heno_motita_user';
@@ -7,7 +7,7 @@ const USER_STORAGE_KEY = '@heno_motita_user';
 // Get current auth token from storage
 export const getStoredToken = async () => {
   try {
-    return await AsyncStorage.getItem(TOKEN_STORAGE_KEY);
+    return await safeStorage.getItem(TOKEN_STORAGE_KEY);
   } catch (error) {
     console.error('Error reading auth token:', error);
     return null;
@@ -18,9 +18,9 @@ export const getStoredToken = async () => {
 export const setStoredToken = async (token) => {
   try {
     if (token) {
-      await AsyncStorage.setItem(TOKEN_STORAGE_KEY, token);
+      await safeStorage.setItem(TOKEN_STORAGE_KEY, token);
     } else {
-      await AsyncStorage.removeItem(TOKEN_STORAGE_KEY);
+      await safeStorage.removeItem(TOKEN_STORAGE_KEY);
     }
   } catch (error) {
     console.error('Error storing auth token:', error);
@@ -30,7 +30,7 @@ export const setStoredToken = async (token) => {
 // Get stored user details
 export const getStoredUser = async () => {
   try {
-    const json = await AsyncStorage.getItem(USER_STORAGE_KEY);
+    const json = await safeStorage.getItem(USER_STORAGE_KEY);
     return json ? JSON.parse(json) : null;
   } catch (error) {
     console.error('Error reading user state:', error);
@@ -42,16 +42,16 @@ export const getStoredUser = async () => {
 export const setStoredUser = async (user) => {
   try {
     if (user) {
-      await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      await safeStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
     } else {
-      await AsyncStorage.removeItem(USER_STORAGE_KEY);
+      await safeStorage.removeItem(USER_STORAGE_KEY);
     }
   } catch (error) {
     console.error('Error storing user state:', error);
   }
 };
 
-// Helper for making API HTTP requests
+// Helper for making API HTTP requests with 15s timeout and Gin error handling
 async function request(endpoint, options = {}) {
   const token = await getStoredToken();
   const headers = {
@@ -63,23 +63,48 @@ async function request(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
   const config = {
     ...options,
     headers,
+    signal: controller.signal,
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-  const data = await response.json().catch(() => ({}));
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    clearTimeout(timeoutId);
 
-  if (!response.ok) {
-    const errorMessage = data?.message || data?.details || `Error del servidor (${response.status})`;
-    const error = new Error(errorMessage);
-    error.status = response.status;
-    error.data = data;
-    throw error;
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401) {
+      // Auto cleanup expired session
+      await setStoredToken(null);
+      await setStoredUser(null);
+    }
+
+    if (!response.ok) {
+      const errorMessage = data?.error || data?.message || data?.details || data?.msg || `Error del servidor (${response.status})`;
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      const timeoutError = new Error('Tiempo de espera agotado al conectar con el servidor HenoTrack (15s)');
+      timeoutError.status = 408;
+      throw timeoutError;
+    }
+    if (!err.status) {
+      err.status = 0; // Network connection failure
+    }
+    throw err;
   }
-
-  return data;
 }
 
 // Health check
@@ -99,20 +124,31 @@ export const login = async (email, password) => {
     body: JSON.stringify({ email, password }),
   });
 
-  if (response.accessToken) {
-    await setStoredToken(response.accessToken);
+  const token = response.accessToken || response.token || response.access_token || response?.data?.token;
+  const user = response.user || response?.data?.user || response;
+
+  if (token) {
+    await setStoredToken(token);
   }
-  if (response.user) {
+  if (user && user !== response) {
+    await setStoredUser(user);
+  } else if (response.user) {
     await setStoredUser(response.user);
   }
 
-  return response;
+  return { ...response, accessToken: token, user: user || response.user };
 };
 
 export const activateStudent = async (data) => {
+  const payload = {
+    ...data,
+    activation_code: data.activationCode || data.activation_code,
+    student_name: data.name || data.student_name,
+    enrollment_code: data.enrollment || data.enrollment_code,
+  };
   return await request('/auth/activate', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 };
 
@@ -123,10 +159,8 @@ export const getManagerDashboard = async () => {
 
 export const getCurrentCrews = async () => {
   try {
-    // Try manager endpoint first
     return await request('/manager/current-crews');
   } catch (err) {
-    // Fallback to general crews endpoint
     return await request('/crews');
   }
 };
@@ -141,10 +175,22 @@ export const getTreesByCrew = async (crewId) => {
 };
 
 export const createTree = async (crewId, treeData) => {
-  // treeData: { code, commonName, scientificName, latitude, longitude, locationDescription }
+  const payload = {
+    ...treeData,
+    code: treeData.code,
+    commonName: treeData.commonName || treeData.common_name,
+    common_name: treeData.commonName || treeData.common_name,
+    scientificName: treeData.scientificName || treeData.scientific_name,
+    scientific_name: treeData.scientificName || treeData.scientific_name,
+    latitude: treeData.latitude,
+    longitude: treeData.longitude,
+    locationDescription: treeData.locationDescription || treeData.location_description,
+    location_description: treeData.locationDescription || treeData.location_description,
+  };
+
   return await request(`/crews/${crewId}/trees`, {
     method: 'POST',
-    body: JSON.stringify(treeData),
+    body: JSON.stringify(payload),
   });
 };
 
@@ -158,10 +204,24 @@ export const getObservationsByTree = async (treeId) => {
 };
 
 export const createObservation = async (treeId, obsData) => {
-  // obsData: { lowerThirdScore, middleThirdScore, upperThirdScore, notes, observationDate, latitude, longitude }
+  const payload = {
+    ...obsData,
+    lowerThirdScore: obsData.lowerThirdScore ?? obsData.lower_third_score ?? 0,
+    lower_third_score: obsData.lowerThirdScore ?? obsData.lower_third_score ?? 0,
+    middleThirdScore: obsData.middleThirdScore ?? obsData.middle_third_score ?? 0,
+    middle_third_score: obsData.middleThirdScore ?? obsData.middle_third_score ?? 0,
+    upperThirdScore: obsData.upperThirdScore ?? obsData.upper_third_score ?? 0,
+    upper_third_score: obsData.upperThirdScore ?? obsData.upper_third_score ?? 0,
+    notes: obsData.notes || '',
+    observationDate: obsData.observationDate || obsData.observation_date || new Date().toISOString(),
+    observation_date: obsData.observationDate || obsData.observation_date || new Date().toISOString(),
+    latitude: obsData.latitude,
+    longitude: obsData.longitude,
+  };
+
   return await request(`/trees/${treeId}/observations`, {
     method: 'POST',
-    body: JSON.stringify(obsData),
+    body: JSON.stringify(payload),
   });
 };
 
@@ -169,8 +229,10 @@ export const getObservationById = async (observationId) => {
   return await request(`/observations/${observationId}`);
 };
 
-// Image Upload Endpoint (Multipart Form Data)
+// Image Upload Endpoint (Multipart Form Data with 'image' and 'file' field keys)
 export const uploadObservationImage = async (observationId, imageUri, description = '') => {
+  if (!imageUri) return null;
+
   const token = await getStoredToken();
   const formData = new FormData();
 
@@ -178,36 +240,48 @@ export const uploadObservationImage = async (observationId, imageUri, descriptio
   const match = /\.(\w+)$/.exec(filename);
   const type = match ? `image/${match[1].toLowerCase() === 'jpg' ? 'jpeg' : match[1].toLowerCase()}` : 'image/jpeg';
 
-  formData.append('image', {
+  const filePayload = {
     uri: imageUri,
     name: filename,
     type,
-  });
+  };
+
+  formData.append('image', filePayload);
+  formData.append('file', filePayload);
 
   if (description) {
     formData.append('description', description);
   }
 
-  const response = await fetch(`${API_BASE_URL}/observations/${observationId}/images`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      // Note: Do NOT set Content-Type header manually when using FormData in React Native
-    },
-    body: formData,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-  const data = await response.json().catch(() => ({}));
+  try {
+    const response = await fetch(`${API_BASE_URL}/observations/${observationId}/images`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
 
-  if (!response.ok) {
-    const errorMessage = data?.message || `Error al subir imagen (${response.status})`;
-    const error = new Error(errorMessage);
-    error.status = response.status;
-    error.data = data;
-    throw error;
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const errorMessage = data?.error || data?.message || `Error al subir imagen (${response.status})`;
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    throw err;
   }
-
-  return data;
 };
 
 export const getObservationImages = async (observationId) => {

@@ -68,8 +68,8 @@ export default function CameraScreen() {
         imageUri = photo?.uri || '';
       }
 
-      const lat = location?.coords?.latitude ? location.coords.latitude.toFixed(4) : '20.0500';
-      const lng = location?.coords?.longitude ? location.coords.longitude.toFixed(4) : '-99.3400';
+      const lat = location?.coords?.latitude ? location.coords.latitude.toFixed(4) : '20.0551';
+      const lng = location?.coords?.longitude ? location.coords.longitude.toFixed(4) : '-99.3407';
       const accuracy = location?.coords?.accuracy ? Math.round(location.coords.accuracy) : 3;
 
       router.push({
@@ -87,8 +87,8 @@ export default function CameraScreen() {
   if (!permission) {
     return (
       <SafeAreaView style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color="#16A34A" />
-        <Text style={styles.loadingText}>Cargando módulo de cámara...</Text>
+        <ActivityIndicator size="large" color="#176B52" />
+        <Text style={styles.loadingText}>Cargando módulo de cámara HenoTrack...</Text>
       </SafeAreaView>
     );
   }
@@ -98,15 +98,16 @@ export default function CameraScreen() {
       <SafeAreaView style={[styles.container, styles.center, { padding: 24 }]}>
         <View style={styles.permissionCard}>
           <View style={styles.permIconCircle}>
-            <Ionicons name="camera-outline" size={36} color="#16A34A" />
+            <Ionicons name="camera-outline" size={36} color="#176B52" />
           </View>
           <Text style={styles.permissionTitle}>Permiso de Cámara Requerido</Text>
           <Text style={styles.permissionSub}>
-            Para realizar la captura del dosel arbóreo y procesar la muestra con el modelo fitosanitario, es necesario permitir el acceso a la cámara.
+            Para realizar la captura del dosel arbóreo y registrar la evidencia en el expediente quincenal, es necesario otorgar acceso a la cámara.
           </Text>
           <Button 
             mode="contained" 
             onPress={requestPermission}
+            buttonColor="#176B52"
             style={styles.permissionBtn}
             labelStyle={{ fontWeight: '800' }}
             icon={() => <Ionicons name="checkmark" size={18} color="#FFFFFF" />}
@@ -116,7 +117,7 @@ export default function CameraScreen() {
           <Button 
             mode="text" 
             onPress={() => router.back()}
-            textColor="#64748B"
+            textColor="#687A74"
             style={{ marginTop: 8 }}
           >
             Cancelar y Regresar
@@ -141,8 +142,8 @@ export default function CameraScreen() {
         {/* Top Header Overlay */}
         <View style={styles.topControls}>
           <View style={styles.modeBadge}>
-            <Ionicons name="leaf-outline" size={14} color="#DCFCE7" style={{ marginRight: 6 }} />
-            <Text style={styles.modeText}>CÁMARA FITOSANITARIA • UTTT</Text>
+            <Ionicons name="leaf-outline" size={14} color="#EDF6F1" style={{ marginRight: 6 }} />
+            <Text style={styles.modeText}>HENOTRACK • CÁMARA MÓVIL</Text>
           </View>
 
           <TouchableOpacity style={styles.cancelPill} onPress={() => router.back()}>
@@ -154,7 +155,7 @@ export default function CameraScreen() {
         {/* GPS Badge Overlay */}
         <View style={styles.gpsContainer}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons name="location" size={16} color="#16A34A" style={{ marginRight: 6 }} />
+            <Ionicons name="location" size={16} color="#176B52" style={{ marginRight: 6 }} />
             <Text style={styles.gpsText}>
               GPS Real: {location 
                 ? `${location.coords.latitude.toFixed(4)}°N, ${location.coords.longitude.toFixed(4)}°W` 
@@ -196,14 +197,14 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#103F32',
   },
   center: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: '#94A3B8',
+    color: '#DCE7E1',
     marginTop: 12,
     fontWeight: '600',
   },
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#EDF6F1',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -226,19 +227,18 @@ const styles = StyleSheet.create({
   permissionTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#163029',
     textAlign: 'center',
     marginBottom: 8,
   },
   permissionSub: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#687A74',
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 18,
   },
   permissionBtn: {
-    backgroundColor: '#16A34A',
     borderRadius: 14,
     width: '100%',
   },
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   modeBadge: {
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    backgroundColor: 'rgba(16, 63, 50, 0.85)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   cancelPill: {
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    backgroundColor: 'rgba(16, 63, 50, 0.85)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -292,13 +292,13 @@ const styles = StyleSheet.create({
   },
   controls: {
     height: 120,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#103F32',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
   instruction: {
-    color: '#94A3B8',
+    color: '#DCE7E1',
     fontSize: 12,
     fontWeight: '600',
     marginBottom: 12,
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   },
   captureBtn: {
     width: '100%',
-    backgroundColor: '#16A34A',
+    backgroundColor: '#176B52',
     paddingVertical: 14,
     borderRadius: 16,
     alignItems: 'center',
@@ -323,12 +323,12 @@ const styles = StyleSheet.create({
     bottom: 16,
     left: 16,
     right: 16,
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    backgroundColor: 'rgba(16, 63, 50, 0.85)',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 14,
     borderLeftWidth: 3,
-    borderLeftColor: '#16A34A',
+    borderLeftColor: '#176B52',
   },
   gpsText: {
     color: '#FFFFFF',
@@ -336,10 +336,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   gpsSignal: {
-    color: '#CBD5E1',
+    color: '#DCE7E1',
     fontSize: 11,
     fontWeight: '500',
     marginTop: 2,
   },
 });
-
