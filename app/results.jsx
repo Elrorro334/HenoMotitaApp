@@ -4,7 +4,7 @@ import { Text, Button, ProgressBar, TextInput } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { createTree, createObservation, uploadObservationImage } from '../services/api';
+import { createTree, createObservation, uploadObservationImage, getTreesByCrew } from '../services/api';
 import { savePendingInspection } from '../services/offlineStore';
 
 export default function ResultsScreen() {
@@ -67,17 +67,35 @@ export default function ResultsScreen() {
     }
 
     try {
-      // 1. Create Tree in backend
-      const treeRes = await createTree(crewId, {
-        code: treeCode.trim(),
-        commonName: species.trim() || 'Mezquite',
-        scientificName: species.trim() === 'Mezquite' ? 'Prosopis laevigata' : 'Acacia farnesiana',
-        latitude,
-        longitude,
-        locationDescription: zone.trim() ? `${zone.trim()}, ${municipality.trim()}` : municipality.trim() || 'Campus UTTT',
-      });
+      let treeId = null;
+      const targetCode = treeCode.trim();
 
-      const treeId = treeRes.id || treeRes._id;
+      // 1. Try creating or resolving existing tree
+      try {
+        const treeRes = await createTree(crewId, {
+          code: targetCode,
+          commonName: species.trim() || 'Mezquite',
+          scientificName: species.trim() === 'Huizache' ? 'Acacia farnesiana' : 'Prosopis laevigata',
+          latitude,
+          longitude,
+          locationDescription: zone.trim() ? `${zone.trim()}, ${municipality.trim()}` : municipality.trim() || 'Campus UTTT',
+        });
+        treeId = treeRes?.id || treeRes?._id || treeRes?.tree?.id || treeRes?.tree?._id || treeRes?.data?.id || treeRes?.data?._id;
+      } catch (createErr) {
+        // If tree already exists (409 Conflict), fetch crew trees to find its ID
+        const existingTrees = await getTreesByCrew(crewId).catch(() => []);
+        const treeList = Array.isArray(existingTrees) ? existingTrees : (existingTrees.trees || existingTrees.data || []);
+        const found = treeList.find(t => (t.code || t.treeCode || '').toLowerCase() === targetCode.toLowerCase());
+        if (found) {
+          treeId = found.id || found._id;
+        } else {
+          throw createErr;
+        }
+      }
+
+      if (!treeId) {
+        throw new Error(`No se pudo resolver el ID para el árbol ${targetCode}`);
+      }
 
       // 2. Create Observation in backend
       const obsRes = await createObservation(treeId, {
@@ -90,7 +108,7 @@ export default function ResultsScreen() {
         longitude,
       });
 
-      const obsId = obsRes.id || obsRes._id;
+      const obsId = obsRes?.id || obsRes?._id || obsRes?.observation?.id || obsRes?.observation?._id || obsRes?.data?.id || obsRes?.data?._id;
 
       // 3. Upload photo evidence if available
       if (imageUri && obsId) {

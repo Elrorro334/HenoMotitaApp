@@ -4,7 +4,7 @@ import { Text, Button, Card, Snackbar, Portal, Modal, Chip, Divider, TextInput }
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { getPendingQueue, clearPendingQueue, removePendingItem, updatePendingItem } from '../../services/offlineStore';
-import { createTree, createObservation, uploadObservationImage } from '../../services/api';
+import { createTree, createObservation, uploadObservationImage, getTreesByCrew } from '../../services/api';
 
 export default function SyncScreen() {
   const { activeCrew, crews } = useAuth();
