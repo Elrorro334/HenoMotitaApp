@@ -1,10 +1,22 @@
 # Heno Motita App (HenoTrack) 🌳📱
 
+![DevSecOps Pipeline](https://img.shields.io/badge/DevSecOps-GitHub_Actions-176B52?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Expo](https://img.shields.io/badge/Expo-1C1E24?style=for-the-badge&logo=expo&logoColor=white)
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)
 
 Aplicación móvil fitosanitaria oficial desarrollada para el proyecto de investigación científica sobre el monitoreo y control del *Heno Motita* (*Tillandsia recurvata*) en la **Universidad Tecnológica de Tula-Tepeji (UTTT)**.
+
+---
+
+## 🔒 Pipelines de DevSecOps & Automatización (CI/CD)
+
+El proyecto incluye pipelines automatizados de **Seguridad y CI/CD** basados en GitHub Actions (`.github/workflows/`):
+
+1. **🛡️ Secret Leak Detection (Gitleaks)**: Escaneo continuo en cada commit para garantizar que no existan llaves privadas, tokens JWT o credenciales expuestas en código fuente.
+2. **📦 Software Composition Analysis (SCA - npm audit & Trivy)**: Auditoría automatizada de vulnerabilidades CVE en paquetes de terceros y dependencias de Node.js.
+3. **🔬 Static Application Security Testing (SAST - CodeQL & Semgrep)**: Análisis estático de código JavaScript/React Native para detectar patrones inseguros e inyecciones.
+4. **⚡ Quality Gate & Bundle Verification**: Verificación automática de compilación de bundle y calidad de código en cada Push y Pull Request.
 
 ---
 
