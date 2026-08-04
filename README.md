@@ -4,19 +4,19 @@
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)
 
-Aplicación móvil fitosanitaria oficial desarrollada por **Estudiantes de Tecnologías de la Información de la Universidad Tecnológica del Valle del Mezquital (UTTT)** para el proyecto institucional de investigación científica sobre el monitoreo y control del *Heno Motita* (*Tillandsia recurvata*).
+Aplicación móvil fitosanitaria oficial desarrollada por **Estudiantes de Tecnologías de la Información de la Universidad Tecnológica de Tula-Tepeji (UTTT)** para el proyecto institucional de investigación científica sobre el monitoreo y control del *Heno Motita* (*Tillandsia recurvata*).
 
 ---
 
 ## 🔬 Proyecto de Investigación Institucional
 
-- **Institución Sede**: Universidad Tecnológica del Valle del Mezquital (UTTT)
+- **Institución Sede**: Universidad Tecnológica de Tula-Tepeji (UTTT)
 - **Docentes Investigadoras Lideres**: Dra. Marisol Reséndiz & Mtra. Odi
 - **Desarrollo Tecnológico**: Estudiantes de Tecnologías de la Información (UTTT)
 - **Frecuencia de Monitoreo**: Levantamiento de datos en campo cada 15 días.
 - **Escala de Evaluación**: Hawksworth Fitosanitario por Tercios (Nivel 0 a 6).
 - **Especies Arbóreas Evaluadas**: Huizaches, Mezquites, Nopales y especies vulnerables con presencia de plaga.
-- **Alcance Geográfico (8 Municipios de Hidalgo)**:
+- **Alcance Geográfico (8 Municipios)**:
   1. **Tula de Allende** (UTTT)
   2. **Tepeji del Río** (UTTT)
   3. **Atitalaquia** (UTTT)
@@ -84,4 +84,4 @@ npx react-native log-android
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT estándar definida en el archivo [`LICENSE`](./LICENSE), preservando los derechos de autor de la **Universidad Tecnológica del Valle del Mezquital (UTTT)** y el equipo de investigación de la **Dra. Marisol Reséndiz** y la **Mtra. Odi**.
+Este proyecto está bajo la Licencia MIT estándar definida en el archivo [`LICENSE`](./LICENSE), preservando los derechos de autor de la **Universidad Tecnológica de Tula-Tepeji (UTTT)** y el equipo de investigación de la **Dra. Marisol Reséndiz** y la **Mtra. Odi**.

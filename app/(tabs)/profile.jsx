@@ -54,7 +54,7 @@ export default function ProfileScreen() {
           <Text style={styles.userRole}>{getRoleTitle(user?.role)}</Text>
         </View>
 
-        <Text style={styles.userInst}>UNIVERSIDAD TECNOLÓGICA DEL VALLE DEL MEZQUITAL (UTTT)</Text>
+        <Text style={styles.userInst}>UNIVERSIDAD TECNOLÓGICA DE TULA-TEPEJI (UTTT)</Text>
         <Text style={styles.userEmail}>{user?.email || 'Servidor Heno Motita'}</Text>
         
         {user?.enrollment && (
