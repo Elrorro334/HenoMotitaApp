@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
-import { Text, Button, Card, Snackbar, Portal, Modal, Chip, Divider } from 'react-native-paper';
+import { Text, Button, Card, Snackbar, Portal, Modal, Chip, Divider, TextInput } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
-import { getPendingQueue, clearPendingQueue, removePendingItem } from '../../services/offlineStore';
+import { getPendingQueue, clearPendingQueue, removePendingItem, updatePendingItem } from '../../services/offlineStore';
 import { createTree, createObservation, uploadObservationImage } from '../../services/api';
 
 export default function SyncScreen() {
@@ -14,9 +14,18 @@ export default function SyncScreen() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
 
-  // Report Details Modal State
+  // Report Details Modal & Editing State
   const [selectedItem, setSelectedItem] = useState(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Edit Form Inputs
+  const [editTreeCode, setEditTreeCode] = useState('');
+  const [editSpecies, setEditSpecies] = useState('');
+  const [editLowerScore, setEditLowerScore] = useState(0);
+  const [editMiddleScore, setEditMiddleScore] = useState(0);
+  const [editUpperScore, setEditUpperScore] = useState(0);
+  const [editComments, setEditComments] = useState('');
 
   const loadQueue = async () => {
     setLoading(true);
@@ -36,12 +45,54 @@ export default function SyncScreen() {
 
   const handleOpenDetails = (item) => {
     setSelectedItem(item);
+    setIsEditing(false);
+    
+    // Fill edit form initial values
+    setEditTreeCode(item.treeCode || item.treeId || '');
+    setEditSpecies(item.species || 'Mezquite');
+    setEditLowerScore(item.lowerThirdScore ?? 0);
+    setEditMiddleScore(item.middleThirdScore ?? 0);
+    setEditUpperScore(item.upperThirdScore ?? 0);
+    setEditComments(item.comments || '');
+
     setDetailsVisible(true);
   };
 
   const handleCloseDetails = () => {
     setDetailsVisible(false);
     setSelectedItem(null);
+    setIsEditing(false);
+  };
+
+  const handleSaveEdits = async () => {
+    if (!selectedItem) return;
+
+    const totalScale = (editLowerScore || 0) + (editMiddleScore || 0) + (editUpperScore || 0);
+    const updatedFields = {
+      treeCode: editTreeCode.trim() || `ARB-UTTT-${Math.floor(Math.random() * 1000)}`,
+      species: editSpecies.trim() || 'Mezquite',
+      lowerThirdScore: editLowerScore,
+      middleThirdScore: editMiddleScore,
+      upperThirdScore: editUpperScore,
+      scale: totalScale,
+      comments: editComments,
+    };
+
+    try {
+      await updatePendingItem(selectedItem.id, updatedFields);
+      await loadQueue();
+
+      setSelectedItem((prev) => ({
+        ...prev,
+        ...updatedFields,
+      }));
+
+      setIsEditing(false);
+      setSnackbarMsg('¡Reporte offline actualizado correctamente!');
+      setSnackbarVisible(true);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudieron guardar los cambios en el reporte offline.');
+    }
   };
 
   const handleRemoveSingle = async (itemId) => {
@@ -234,7 +285,7 @@ export default function SyncScreen() {
                         onPress={() => handleOpenDetails(item)}
                       >
                         <Ionicons name="eye-outline" size={16} color="#176B52" style={{ marginRight: 4 }} />
-                        <Text style={styles.detailsBtnText}>Ver Detalles del Reporte</Text>
+                        <Text style={styles.detailsBtnText}>Ver o Editar Registro</Text>
                       </TouchableOpacity>
                     </View>
                   </Card.Content>
@@ -263,7 +314,7 @@ export default function SyncScreen() {
         </View>
       )}
 
-      {/* Report Details Modal */}
+      {/* Report Details & Edit Modal */}
       <Portal>
         <Modal
           visible={detailsVisible}
@@ -274,8 +325,10 @@ export default function SyncScreen() {
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.modalHeader}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.modalTitle}>Detalles de la Inspección</Text>
-                  <Text style={styles.modalSubtitle}>Código de Árbol: {selectedItem.treeCode || selectedItem.treeId || 'Sin Código'}</Text>
+                  <Text style={styles.modalTitle}>
+                    {isEditing ? 'Editar Reporte Offline' : 'Detalles de la Inspección'}
+                  </Text>
+                  <Text style={styles.modalSubtitle}>Código: {selectedItem.treeCode || selectedItem.treeId || 'Sin Código'}</Text>
                 </View>
                 <TouchableOpacity onPress={handleCloseDetails} style={styles.closeBtn}>
                   <Ionicons name="close" size={24} color="#687A74" />
@@ -295,84 +348,199 @@ export default function SyncScreen() {
                 </View>
               ) : null}
 
-              {/* Information Badges */}
-              <View style={styles.detailRow}>
-                <Ionicons name="leaf-outline" size={18} color="#176B52" style={{ marginRight: 8 }} />
-                <Text style={styles.detailLabel}>Especie de Árbol:</Text>
-                <Text style={styles.detailValue}>{selectedItem.species || 'Mezquite'}</Text>
-              </View>
+              {/* Normal View Mode vs Edit Mode */}
+              {!isEditing ? (
+                <>
+                  <View style={styles.detailRow}>
+                    <Ionicons name="leaf-outline" size={18} color="#176B52" style={{ marginRight: 8 }} />
+                    <Text style={styles.detailLabel}>Especie de Árbol:</Text>
+                    <Text style={styles.detailValue}>{selectedItem.species || 'Mezquite'}</Text>
+                  </View>
 
-              <View style={styles.detailRow}>
-                <Ionicons name="calendar-outline" size={18} color="#176B52" style={{ marginRight: 8 }} />
-                <Text style={styles.detailLabel}>Fecha y Hora:</Text>
-                <Text style={styles.detailValue}>
-                  {new Date(selectedItem.createdAt || selectedItem.date).toLocaleString('es-MX')}
-                </Text>
-              </View>
+                  <View style={styles.detailRow}>
+                    <Ionicons name="calendar-outline" size={18} color="#176B52" style={{ marginRight: 8 }} />
+                    <Text style={styles.detailLabel}>Fecha y Hora:</Text>
+                    <Text style={styles.detailValue}>
+                      {new Date(selectedItem.createdAt || selectedItem.date).toLocaleString('es-MX')}
+                    </Text>
+                  </View>
 
-              <View style={styles.detailRow}>
-                <Ionicons name="location-outline" size={18} color="#176B52" style={{ marginRight: 8 }} />
-                <Text style={styles.detailLabel}>Coordenadas GPS:</Text>
-                <Text style={styles.detailValue}>
-                  {selectedItem.latitude ? Number(selectedItem.latitude).toFixed(4) : '20.0551'}, {selectedItem.longitude ? Number(selectedItem.longitude).toFixed(4) : '-99.3407'}
-                </Text>
-              </View>
+                  <View style={styles.detailRow}>
+                    <Ionicons name="location-outline" size={18} color="#176B52" style={{ marginRight: 8 }} />
+                    <Text style={styles.detailLabel}>Coordenadas GPS:</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedItem.latitude ? Number(selectedItem.latitude).toFixed(4) : '20.0551'}, {selectedItem.longitude ? Number(selectedItem.longitude).toFixed(4) : '-99.3407'}
+                    </Text>
+                  </View>
 
-              <Divider style={{ marginVertical: 14 }} />
+                  <Divider style={{ marginVertical: 14 }} />
 
-              {/* Hawksworth Breakdown */}
-              <Text style={styles.sectionHeaderTitle}>Evaluación por Tercios (Hawksworth)</Text>
-              
-              <View style={styles.thirdsContainer}>
-                <View style={styles.thirdBox}>
-                  <Text style={styles.thirdBoxLabel}>Superior</Text>
-                  <Text style={styles.thirdBoxScore}>{selectedItem.upperThirdScore ?? 0} / 2</Text>
+                  {/* Hawksworth Breakdown */}
+                  <Text style={styles.sectionHeaderTitle}>Evaluación por Tercios (Hawksworth)</Text>
+                  
+                  <View style={styles.thirdsContainer}>
+                    <View style={styles.thirdBox}>
+                      <Text style={styles.thirdBoxLabel}>Superior</Text>
+                      <Text style={styles.thirdBoxScore}>{selectedItem.upperThirdScore ?? 0} / 2</Text>
+                    </View>
+                    <View style={styles.thirdBox}>
+                      <Text style={styles.thirdBoxLabel}>Medio</Text>
+                      <Text style={styles.thirdBoxScore}>{selectedItem.middleThirdScore ?? 0} / 2</Text>
+                    </View>
+                    <View style={styles.thirdBox}>
+                      <Text style={styles.thirdBoxLabel}>Inferior</Text>
+                      <Text style={styles.thirdBoxScore}>{selectedItem.lowerThirdScore ?? 0} / 2</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.totalScoreRow}>
+                    <Text style={styles.totalScoreLabel}>Afectación Total:</Text>
+                    <Chip style={styles.totalScoreChip} textStyle={{ color: '#D99A28', fontWeight: '800' }}>
+                      {selectedItem.scale ?? ((selectedItem.lowerThirdScore || 0) + (selectedItem.middleThirdScore || 0) + (selectedItem.upperThirdScore || 0))} / 6 Puntos
+                    </Chip>
+                  </View>
+
+                  {/* Comments / Notes */}
+                  {selectedItem.comments ? (
+                    <View style={styles.commentsBox}>
+                      <Text style={styles.commentsTitle}>Notas del Inspector:</Text>
+                      <Text style={styles.commentsBody}>{selectedItem.comments}</Text>
+                    </View>
+                  ) : null}
+
+                  {/* View Actions Row */}
+                  <View style={styles.modalActionsRow}>
+                    <Button 
+                      mode="outlined" 
+                      onPress={() => setIsEditing(true)} 
+                      textColor="#176B52"
+                      style={{ borderColor: '#176B52', borderRadius: 12, flex: 1 }}
+                      icon={() => <Ionicons name="create-outline" size={18} color="#176B52" />}
+                    >
+                      Editar
+                    </Button>
+                    <Button 
+                      mode="outlined" 
+                      onPress={() => handleRemoveSingle(selectedItem.id)} 
+                      textColor="#C75B52"
+                      style={{ borderColor: '#F9DCDA', borderRadius: 12, flex: 1, marginLeft: 8 }}
+                      icon={() => <Ionicons name="trash-outline" size={18} color="#C75B52" />}
+                    >
+                      Eliminar
+                    </Button>
+                  </View>
+                </>
+              ) : (
+                /* Edit Mode Controls */
+                <View style={styles.editFormContainer}>
+                  <TextInput
+                    label="Código del Árbol"
+                    value={editTreeCode}
+                    onChangeText={setEditTreeCode}
+                    mode="outlined"
+                    outlineColor="#DCE7E1"
+                    activeOutlineColor="#176B52"
+                    style={{ marginBottom: 12, backgroundColor: '#FFFFFF' }}
+                  />
+
+                  <TextInput
+                    label="Especie del Árbol"
+                    value={editSpecies}
+                    onChangeText={setEditSpecies}
+                    mode="outlined"
+                    outlineColor="#DCE7E1"
+                    activeOutlineColor="#176B52"
+                    style={{ marginBottom: 16, backgroundColor: '#FFFFFF' }}
+                  />
+
+                  <Text style={styles.editSectionTitle}>Ajustar Tercios Hawksworth (0 - 2 pts):</Text>
+                  
+                  {/* Score selectors */}
+                  <View style={styles.scoreEditRow}>
+                    <Text style={styles.scoreEditLabel}>Tercio Superior:</Text>
+                    <View style={styles.scoreSelectorGroup}>
+                      {[0, 1, 2].map((num) => (
+                        <TouchableOpacity
+                          key={`upper-${num}`}
+                          style={[styles.scoreChipBtn, editUpperScore === num && styles.scoreChipActive]}
+                          onPress={() => setEditUpperScore(num)}
+                        >
+                          <Text style={[styles.scoreChipText, editUpperScore === num && styles.scoreChipTextActive]}>
+                            {num}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={styles.scoreEditRow}>
+                    <Text style={styles.scoreEditLabel}>Tercio Medio:</Text>
+                    <View style={styles.scoreSelectorGroup}>
+                      {[0, 1, 2].map((num) => (
+                        <TouchableOpacity
+                          key={`middle-${num}`}
+                          style={[styles.scoreChipBtn, editMiddleScore === num && styles.scoreChipActive]}
+                          onPress={() => setEditMiddleScore(num)}
+                        >
+                          <Text style={[styles.scoreChipText, editMiddleScore === num && styles.scoreChipTextActive]}>
+                            {num}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={styles.scoreEditRow}>
+                    <Text style={styles.scoreEditLabel}>Tercio Inferior:</Text>
+                    <View style={styles.scoreSelectorGroup}>
+                      {[0, 1, 2].map((num) => (
+                        <TouchableOpacity
+                          key={`lower-${num}`}
+                          style={[styles.scoreChipBtn, editLowerScore === num && styles.scoreChipActive]}
+                          onPress={() => setEditLowerScore(num)}
+                        >
+                          <Text style={[styles.scoreChipText, editLowerScore === num && styles.scoreChipTextActive]}>
+                            {num}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <TextInput
+                    label="Notas u Observaciones"
+                    value={editComments}
+                    onChangeText={setEditComments}
+                    mode="outlined"
+                    multiline
+                    numberOfLines={3}
+                    outlineColor="#DCE7E1"
+                    activeOutlineColor="#176B52"
+                    style={{ marginTop: 12, marginBottom: 16, backgroundColor: '#FFFFFF' }}
+                  />
+
+                  {/* Edit Mode Buttons */}
+                  <View style={styles.modalActionsRow}>
+                    <Button 
+                      mode="outlined" 
+                      onPress={() => setIsEditing(false)} 
+                      textColor="#687A74"
+                      style={{ borderColor: '#DCE7E1', borderRadius: 12, flex: 1 }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      mode="contained" 
+                      onPress={handleSaveEdits} 
+                      buttonColor="#176B52"
+                      style={{ borderRadius: 12, flex: 1, marginLeft: 8 }}
+                      icon={() => <Ionicons name="checkmark" size={18} color="#FFFFFF" />}
+                    >
+                      Guardar Cambios
+                    </Button>
+                  </View>
                 </View>
-                <View style={styles.thirdBox}>
-                  <Text style={styles.thirdBoxLabel}>Medio</Text>
-                  <Text style={styles.thirdBoxScore}>{selectedItem.middleThirdScore ?? 0} / 2</Text>
-                </View>
-                <View style={styles.thirdBox}>
-                  <Text style={styles.thirdBoxLabel}>Inferior</Text>
-                  <Text style={styles.thirdBoxScore}>{selectedItem.lowerThirdScore ?? 0} / 2</Text>
-                </View>
-              </View>
-
-              <View style={styles.totalScoreRow}>
-                <Text style={styles.totalScoreLabel}>Afectación Total:</Text>
-                <Chip style={styles.totalScoreChip} textStyle={{ color: '#D99A28', fontWeight: '800' }}>
-                  {selectedItem.scale ?? ((selectedItem.lowerThirdScore || 0) + (selectedItem.middleThirdScore || 0) + (selectedItem.upperThirdScore || 0))} / 6 Puntos
-                </Chip>
-              </View>
-
-              {/* Comments / Notes */}
-              {selectedItem.comments ? (
-                <View style={styles.commentsBox}>
-                  <Text style={styles.commentsTitle}>Notas del Inspector:</Text>
-                  <Text style={styles.commentsBody}>{selectedItem.comments}</Text>
-                </View>
-              ) : null}
-
-              {/* Modal Actions */}
-              <View style={styles.modalActionsRow}>
-                <Button 
-                  mode="outlined" 
-                  onPress={() => handleRemoveSingle(selectedItem.id)} 
-                  textColor="#C75B52"
-                  style={{ borderColor: '#F9DCDA', borderRadius: 12, flex: 1 }}
-                  icon={() => <Ionicons name="trash-outline" size={18} color="#C75B52" />}
-                >
-                  Eliminar
-                </Button>
-                <Button 
-                  mode="contained" 
-                  onPress={handleCloseDetails} 
-                  buttonColor="#176B52"
-                  style={{ borderRadius: 12, flex: 1, marginLeft: 8 }}
-                >
-                  Cerrar
-                </Button>
-              </View>
+              )}
             </ScrollView>
           )}
         </Modal>
@@ -686,5 +854,57 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 8,
     marginBottom: 4,
+  },
+  // Edit Form Styles
+  editFormContainer: {
+    paddingVertical: 4,
+  },
+  editSectionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#163029',
+    marginBottom: 10,
+  },
+  scoreEditRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    backgroundColor: '#F4F8F5',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#DCE7E1',
+  },
+  scoreEditLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#163029',
+  },
+  scoreSelectorGroup: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  scoreChipBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DCE7E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scoreChipActive: {
+    backgroundColor: '#176B52',
+    borderColor: '#176B52',
+  },
+  scoreChipText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#687A74',
+  },
+  scoreChipTextActive: {
+    color: '#FFFFFF',
   },
 });
