@@ -91,18 +91,23 @@ export default function ProfileScreen() {
 
       <View style={styles.infoCard}>
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Investigación:</Text>
+          <Text style={styles.specLabel}>Proyecto:</Text>
           <Text style={styles.specVal}>Monitoreo y Control Fitosanitario de Heno Motita (*Tillandsia recurvata*)</Text>
         </View>
         <Divider style={{ marginVertical: 8 }} />
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Docentes Lideres:</Text>
-          <Text style={styles.specVal}>Dra. Marisol Reséndiz & Mtra. Odi</Text>
+          <Text style={styles.specLabel}>Docentes Investigadoras:</Text>
+          <Text style={styles.specVal}>Dra. Marisol Reséndiz Vega{'\n'}Mtra. Odisey Yasmin Porras</Text>
         </View>
         <Divider style={{ marginVertical: 8 }} />
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Desarrollo:</Text>
-          <Text style={styles.specVal}>Estudiantes de Tecnologías de la Información (UTTT)</Text>
+          <Text style={styles.specLabel}>Desarrolladores TI:</Text>
+          <Text style={styles.specVal}>
+            • Dorian Alejandro Trejo Vega{'\n'}
+            • Rodrigo Domínguez Crespo{'\n'}
+            • Jessui Flores Pacheco{'\n'}
+            • Omar Picazo Aranzolo
+          </Text>
         </View>
         <Divider style={{ marginVertical: 8 }} />
         <View style={styles.specRow}>
@@ -116,7 +121,7 @@ export default function ProfileScreen() {
         </View>
         <Divider style={{ marginVertical: 8 }} />
         <View style={styles.specRow}>
-          <Text style={styles.specLabel}>Red de Instituciones:</Text>
+          <Text style={styles.specLabel}>Red Interinstitucional:</Text>
           <Text style={styles.specVal}>UTTT, CECYTE, CETAC 2, COBAEH, UAEH</Text>
         </View>
         <Divider style={{ marginVertical: 8 }} />

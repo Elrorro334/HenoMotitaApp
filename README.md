@@ -4,27 +4,38 @@
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)
 
-Aplicación móvil fitosanitaria oficial desarrollada por **Estudiantes de Tecnologías de la Información de la Universidad Tecnológica de Tula-Tepeji (UTTT)** para el proyecto institucional de investigación científica sobre el monitoreo y control del *Heno Motita* (*Tillandsia recurvata*).
+Aplicación móvil fitosanitaria oficial desarrollada para el proyecto de investigación científica sobre el monitoreo y control del *Heno Motita* (*Tillandsia recurvata*) en la **Universidad Tecnológica de Tula-Tepeji (UTTT)**.
 
 ---
 
-## 🔬 Proyecto de Investigación Institucional
+## 🔬 Créditos y Equipo de Investigación UTTT
 
-- **Institución Sede**: Universidad Tecnológica de Tula-Tepeji (UTTT)
-- **Docentes Investigadoras Lideres**: Dra. Marisol Reséndiz & Mtra. Odi
-- **Desarrollo Tecnológico**: Estudiantes de Tecnologías de la Información (UTTT)
+### 👩‍🏫 Docentes Investigadoras Líderes
+- **Dra. Marisol Reséndiz Vega**
+- **Mtra. Odisey Yasmin Porras**
+
+### 👨‍💻 Alumnos Desarrolladores del Proyecto Completo (Equipo de TI UTTT)
+- **Dorian Alejandro Trejo Vega**
+- **Rodrigo Domínguez Crespo**
+- **Jessui Flores Pacheco**
+- **Omar Picazo Aranzolo**
+
+---
+
+## 📍 Alcance Fitosanitario del Proyecto
+
 - **Frecuencia de Monitoreo**: Levantamiento de datos en campo cada 15 días.
 - **Escala de Evaluación**: Hawksworth Fitosanitario por Tercios (Nivel 0 a 6).
 - **Especies Arbóreas Evaluadas**: Huizaches, Mezquites, Nopales y especies vulnerables con presencia de plaga.
-- **Alcance Geográfico (8 Municipios)**:
-  1. **Tula de Allende** (UTTT)
-  2. **Tepeji del Río** (UTTT)
-  3. **Atitalaquia** (UTTT)
-  4. **Tlaxcoapan** (UTTT)
-  5. **Tepetitlán** (CECYTE)
-  6. **Tezontepec de Aldama** (CETAC 2)
-  7. **Atotonilco de Tula** (COBAEH)
-  8. **Tlahuelilpan** (UAEH)
+- **Red Interinstitucional y Municipios Monitoreados (8)**:
+  1. **Tula de Allende** 🤝 Universidad Tecnológica de Tula-Tepeji (UTTT)
+  2. **Tepeji del Río** 🤝 Universidad Tecnológica de Tula-Tepeji (UTTT)
+  3. **Atitalaquia** 🤝 Universidad Tecnológica de Tula-Tepeji (UTTT)
+  4. **Tlaxcoapan** 🤝 Universidad Tecnológica de Tula-Tepeji (UTTT)
+  5. **Tepetitlán** 🤝 CECYTE
+  6. **Tezontepec de Aldama** 🤝 CETAC 2
+  7. **Atotonilco de Tula** 🤝 COBAEH
+  8. **Tlahuelilpan** 🤝 UAEH
 
 ---
 
@@ -84,4 +95,4 @@ npx react-native log-android
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT estándar definida en el archivo [`LICENSE`](./LICENSE), preservando los derechos de autor de la **Universidad Tecnológica de Tula-Tepeji (UTTT)** y el equipo de investigación de la **Dra. Marisol Reséndiz** y la **Mtra. Odi**.
+Este proyecto está bajo la Licencia MIT estándar definida en el archivo [`LICENSE`](./LICENSE), reconociendo la autoría de la **Universidad Tecnológica de Tula-Tepeji (UTTT)**, las docentes **Dra. Marisol Reséndiz Vega** y **Mtra. Odisey Yasmin Porras**, y el equipo de alumnos desarrolladores de TI (**Dorian Alejandro Trejo Vega**, **Rodrigo Domínguez Crespo**, **Jessui Flores Pacheco** y **Omar Picazo Aranzolo**).
