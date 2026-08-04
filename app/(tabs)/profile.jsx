@@ -104,7 +104,7 @@ export default function ProfileScreen() {
           <Text style={styles.specLabel}>Desarrolladores TI:</Text>
           <Text style={styles.specVal}>
             • Dorian Alejandro Trejo Vega{'\n'}
-            • Rodrigo Domínguez Crespo{'\n'}
+            • Rodrigo Sánchez Cruz{'\n'}
             • Jessui Flores Pacheco{'\n'}
             • Omar Picazo Aranzolo
           </Text>
