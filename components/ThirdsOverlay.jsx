@@ -5,13 +5,13 @@ export default function ThirdsOverlay() {
   return (
     <View style={styles.overlayContainer} pointerEvents="none">
       <View style={[styles.third, styles.topThird]}>
-        <Text style={styles.label}>Tercio Superior</Text>
+        <Text style={styles.label}>Tercio Superior (0, 1 o 2)</Text>
       </View>
       <View style={[styles.third, styles.middleThird]}>
-        <Text style={styles.label}>Tercio Medio</Text>
+        <Text style={styles.label}>Tercio Medio (0, 1 o 2)</Text>
       </View>
       <View style={[styles.third, styles.bottomThird]}>
-        <Text style={styles.label}>Tercio Inferior</Text>
+        <Text style={styles.label}>Tercio Inferior (0, 1 o 2)</Text>
       </View>
     </View>
   );
