@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
-import { Text, Button, Card, Snackbar } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Alert, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { Text, Button, Card, Snackbar, Portal, Modal, Chip, Divider } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { getPendingQueue, clearPendingQueue, removePendingItem } from '../../services/offlineStore';
@@ -13,6 +13,10 @@ export default function SyncScreen() {
   const [syncing, setSyncing] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
+
+  // Report Details Modal State
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [detailsVisible, setDetailsVisible] = useState(false);
 
   const loadQueue = async () => {
     setLoading(true);
@@ -29,6 +33,37 @@ export default function SyncScreen() {
   useEffect(() => {
     loadQueue();
   }, []);
+
+  const handleOpenDetails = (item) => {
+    setSelectedItem(item);
+    setDetailsVisible(true);
+  };
+
+  const handleCloseDetails = () => {
+    setDetailsVisible(false);
+    setSelectedItem(null);
+  };
+
+  const handleRemoveSingle = async (itemId) => {
+    Alert.alert(
+      'Eliminar Registro',
+      '¿Deseas eliminar esta captura de la cola local?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            await removePendingItem(itemId);
+            handleCloseDetails();
+            await loadQueue();
+            setSnackbarMsg('Registro eliminado de la cola local.');
+            setSnackbarVisible(true);
+          },
+        },
+      ]
+    );
+  };
 
   const handleSync = async () => {
     if (items.length === 0) {
@@ -170,24 +205,42 @@ export default function SyncScreen() {
               </Button>
             </View>
 
-            {items.map((item) => (
-              <Card key={item.id} style={styles.card} elevation={1}>
-                <Card.Content style={styles.cardContent}>
-                  <View style={styles.cardRow}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.treeIdText}>{item.treeCode || item.treeId || 'Sin Código'}</Text>
-                      <Text style={styles.dateText}>
-                        {new Date(item.createdAt || item.date).toLocaleString('es-MX')} · {item.species || 'Mezquite'}
-                      </Text>
+            {items.map((item) => {
+              const totalScore = item.scale ?? ((item.lowerThirdScore || 0) + (item.middleThirdScore || 0) + (item.upperThirdScore || 0));
+              return (
+                <Card 
+                  key={item.id} 
+                  style={styles.card} 
+                  elevation={1}
+                  onPress={() => handleOpenDetails(item)}
+                >
+                  <Card.Content style={styles.cardContent}>
+                    <View style={styles.cardRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.treeIdText}>{item.treeCode || item.treeId || 'Sin Código'}</Text>
+                        <Text style={styles.dateText}>
+                          {new Date(item.createdAt || item.date).toLocaleString('es-MX')} · {item.species || 'Mezquite'}
+                        </Text>
+                      </View>
+
+                      <View style={styles.scaleBadge}>
+                        <Text style={styles.scaleText}>Hawksworth {totalScore}/6</Text>
+                      </View>
                     </View>
 
-                    <View style={styles.scaleBadge}>
-                      <Text style={styles.scaleText}>Hawksworth {item.scale ?? (item.lowerThirdScore + item.middleThirdScore + item.upperThirdScore)}/6</Text>
+                    <View style={styles.cardActionRow}>
+                      <TouchableOpacity 
+                        style={styles.detailsBtn} 
+                        onPress={() => handleOpenDetails(item)}
+                      >
+                        <Ionicons name="eye-outline" size={16} color="#176B52" style={{ marginRight: 4 }} />
+                        <Text style={styles.detailsBtnText}>Ver Detalles del Reporte</Text>
+                      </TouchableOpacity>
                     </View>
-                  </View>
-                </Card.Content>
-              </Card>
-            ))}
+                  </Card.Content>
+                </Card>
+              );
+            })}
           </>
         )}
       </ScrollView>
@@ -205,10 +258,125 @@ export default function SyncScreen() {
             contentStyle={{ paddingVertical: 8 }}
             icon={() => <Ionicons name="cloud-upload" size={20} color="#FFFFFF" />}
           >
-            Transmitir {items.length} Registro{items.length > 1 ? 's' : ''} a la API
+            Transmitir {items.length} Registro{items.length > 1 ? 's' : ''} al Sistema
           </Button>
         </View>
       )}
+
+      {/* Report Details Modal */}
+      <Portal>
+        <Modal
+          visible={detailsVisible}
+          onDismiss={handleCloseDetails}
+          contentContainerStyle={styles.modalContainer}
+        >
+          {selectedItem && (
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.modalHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.modalTitle}>Detalles de la Inspección</Text>
+                  <Text style={styles.modalSubtitle}>Código de Árbol: {selectedItem.treeCode || selectedItem.treeId || 'Sin Código'}</Text>
+                </View>
+                <TouchableOpacity onPress={handleCloseDetails} style={styles.closeBtn}>
+                  <Ionicons name="close" size={24} color="#687A74" />
+                </TouchableOpacity>
+              </View>
+
+              <Divider style={{ marginVertical: 12 }} />
+
+              {/* Photo Evidence Preview */}
+              {selectedItem.imageUri ? (
+                <View style={styles.imagePreviewContainer}>
+                  <Image source={{ uri: selectedItem.imageUri }} style={styles.previewImage} resizeMode="cover" />
+                  <View style={styles.imageBadge}>
+                    <Ionicons name="camera" size={12} color="#FFFFFF" style={{ marginRight: 4 }} />
+                    <Text style={styles.imageBadgeText}>Fotografía Adjunta</Text>
+                  </View>
+                </View>
+              ) : null}
+
+              {/* Information Badges */}
+              <View style={styles.detailRow}>
+                <Ionicons name="leaf-outline" size={18} color="#176B52" style={{ marginRight: 8 }} />
+                <Text style={styles.detailLabel}>Especie de Árbol:</Text>
+                <Text style={styles.detailValue}>{selectedItem.species || 'Mezquite'}</Text>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Ionicons name="calendar-outline" size={18} color="#176B52" style={{ marginRight: 8 }} />
+                <Text style={styles.detailLabel}>Fecha y Hora:</Text>
+                <Text style={styles.detailValue}>
+                  {new Date(selectedItem.createdAt || selectedItem.date).toLocaleString('es-MX')}
+                </Text>
+              </View>
+
+              <View style={styles.detailRow}>
+                <Ionicons name="location-outline" size={18} color="#176B52" style={{ marginRight: 8 }} />
+                <Text style={styles.detailLabel}>Coordenadas GPS:</Text>
+                <Text style={styles.detailValue}>
+                  {selectedItem.latitude ? Number(selectedItem.latitude).toFixed(4) : '20.0551'}, {selectedItem.longitude ? Number(selectedItem.longitude).toFixed(4) : '-99.3407'}
+                </Text>
+              </View>
+
+              <Divider style={{ marginVertical: 14 }} />
+
+              {/* Hawksworth Breakdown */}
+              <Text style={styles.sectionHeaderTitle}>Evaluación por Tercios (Hawksworth)</Text>
+              
+              <View style={styles.thirdsContainer}>
+                <View style={styles.thirdBox}>
+                  <Text style={styles.thirdBoxLabel}>Superior</Text>
+                  <Text style={styles.thirdBoxScore}>{selectedItem.upperThirdScore ?? 0} / 2</Text>
+                </View>
+                <View style={styles.thirdBox}>
+                  <Text style={styles.thirdBoxLabel}>Medio</Text>
+                  <Text style={styles.thirdBoxScore}>{selectedItem.middleThirdScore ?? 0} / 2</Text>
+                </View>
+                <View style={styles.thirdBox}>
+                  <Text style={styles.thirdBoxLabel}>Inferior</Text>
+                  <Text style={styles.thirdBoxScore}>{selectedItem.lowerThirdScore ?? 0} / 2</Text>
+                </View>
+              </View>
+
+              <View style={styles.totalScoreRow}>
+                <Text style={styles.totalScoreLabel}>Afectación Total:</Text>
+                <Chip style={styles.totalScoreChip} textStyle={{ color: '#D99A28', fontWeight: '800' }}>
+                  {selectedItem.scale ?? ((selectedItem.lowerThirdScore || 0) + (selectedItem.middleThirdScore || 0) + (selectedItem.upperThirdScore || 0))} / 6 Puntos
+                </Chip>
+              </View>
+
+              {/* Comments / Notes */}
+              {selectedItem.comments ? (
+                <View style={styles.commentsBox}>
+                  <Text style={styles.commentsTitle}>Notas del Inspector:</Text>
+                  <Text style={styles.commentsBody}>{selectedItem.comments}</Text>
+                </View>
+              ) : null}
+
+              {/* Modal Actions */}
+              <View style={styles.modalActionsRow}>
+                <Button 
+                  mode="outlined" 
+                  onPress={() => handleRemoveSingle(selectedItem.id)} 
+                  textColor="#C75B52"
+                  style={{ borderColor: '#F9DCDA', borderRadius: 12, flex: 1 }}
+                  icon={() => <Ionicons name="trash-outline" size={18} color="#C75B52" />}
+                >
+                  Eliminar
+                </Button>
+                <Button 
+                  mode="contained" 
+                  onPress={handleCloseDetails} 
+                  buttonColor="#176B52"
+                  style={{ borderRadius: 12, flex: 1, marginLeft: 8 }}
+                >
+                  Cerrar
+                </Button>
+              </View>
+            </ScrollView>
+          )}
+        </Modal>
+      </Portal>
 
       <Snackbar
         visible={snackbarVisible}
@@ -277,7 +445,7 @@ const styles = StyleSheet.create({
     color: '#163029',
   },
   card: {
-    marginBottom: 10,
+    marginBottom: 12,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     borderWidth: 1,
@@ -292,7 +460,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   treeIdText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
     color: '#163029',
   },
@@ -311,6 +479,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     color: '#D99A28',
+  },
+  cardActionRow: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderColor: '#F0F5F2',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  detailsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDF6F1',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  detailsBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#176B52',
   },
   loadingContainer: {
     alignItems: 'center',
@@ -359,5 +548,143 @@ const styles = StyleSheet.create({
   },
   syncButton: {
     borderRadius: 16,
+  },
+  // Modal Details Styles
+  modalContainer: {
+    backgroundColor: '#FFFFFF',
+    margin: 20,
+    borderRadius: 24,
+    padding: 20,
+    maxHeight: '85%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#163029',
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#176B52',
+    marginTop: 2,
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  imagePreviewContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  previewImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: 16,
+  },
+  imageBadge: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    backgroundColor: 'rgba(16, 63, 50, 0.85)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imageBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  detailLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#687A74',
+    marginRight: 6,
+  },
+  detailValue: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#163029',
+    flex: 1,
+  },
+  sectionHeaderTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#163029',
+    marginBottom: 10,
+  },
+  thirdsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  thirdBox: {
+    flex: 1,
+    backgroundColor: '#F4F8F5',
+    padding: 10,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DCE7E1',
+  },
+  thirdBoxLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#687A74',
+    marginBottom: 2,
+  },
+  thirdBoxScore: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#176B52',
+  },
+  totalScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  totalScoreLabel: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#163029',
+  },
+  totalScoreChip: {
+    backgroundColor: '#FFF5DF',
+  },
+  commentsBox: {
+    backgroundColor: '#F4F8F5',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: '#176B52',
+  },
+  commentsTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#176B52',
+    marginBottom: 4,
+  },
+  commentsBody: {
+    fontSize: 13,
+    color: '#3F4E4A',
+    lineHeight: 18,
+  },
+  modalActionsRow: {
+    flexDirection: 'row',
+    marginTop: 8,
+    marginBottom: 4,
   },
 });
