@@ -17,6 +17,11 @@ export default function CameraScreen() {
   const [locationError, setLocationError] = useState(null);
   const [capturing, setCapturing] = useState(false);
 
+  // Camera Settings
+  const [facing, setFacing] = useState('back');
+  const [flash, setFlash] = useState('off'); // 'off' | 'on' | 'auto'
+  const [showGrid, setShowGrid] = useState(true);
+
   useEffect(() => {
     let subscriber = null;
 
@@ -24,7 +29,7 @@ export default function CameraScreen() {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          setLocationError('Permiso de GPS denegado');
+          setLocationError('Permiso GPS no concedido');
           return;
         }
 
@@ -44,7 +49,7 @@ export default function CameraScreen() {
           }
         );
       } catch (err) {
-        setLocationError('Buscando señal GPS...');
+        setLocationError('Buscando satélites GPS...');
       }
     }
 
@@ -56,6 +61,16 @@ export default function CameraScreen() {
       }
     };
   }, []);
+
+  const toggleFlash = () => {
+    if (flash === 'off') setFlash('on');
+    else if (flash === 'on') setFlash('auto');
+    else setFlash('off');
+  };
+
+  const toggleFacing = () => {
+    setFacing((prev) => (prev === 'back' ? 'front' : 'back'));
+  };
 
   const handleCapture = async () => {
     if (capturing) return;
@@ -77,7 +92,7 @@ export default function CameraScreen() {
         params: { imageUri, lat, lng, accuracy },
       });
     } catch (error) {
-      console.warn('Error tomando foto:', error);
+      console.warn('Error al capturar fotografía:', error);
       router.push('/results');
     } finally {
       setCapturing(false);
@@ -87,8 +102,8 @@ export default function CameraScreen() {
   if (!permission) {
     return (
       <SafeAreaView style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color="#176B52" />
-        <Text style={styles.loadingText}>Cargando módulo de cámara HenoTrack...</Text>
+        <ActivityIndicator size="large" color="#5EEAD4" />
+        <Text style={styles.loadingText}>Iniciando Visor Móvil HenoTrack...</Text>
       </SafeAreaView>
     );
   }
@@ -98,11 +113,11 @@ export default function CameraScreen() {
       <SafeAreaView style={[styles.container, styles.center, { padding: 24 }]}>
         <View style={styles.permissionCard}>
           <View style={styles.permIconCircle}>
-            <Ionicons name="camera-outline" size={36} color="#176B52" />
+            <Ionicons name="camera" size={36} color="#176B52" />
           </View>
-          <Text style={styles.permissionTitle}>Permiso de Cámara Requerido</Text>
+          <Text style={styles.permissionTitle}>Acceso a Cámara Requerido</Text>
           <Text style={styles.permissionSub}>
-            Para realizar la captura del dosel arbóreo y registrar la evidencia en el expediente quincenal, es necesario otorgar acceso a la cámara.
+            Para evaluar el grado de infestación de Heno Motita en el dosel arbóreo, se requiere acceso a la cámara del dispositivo.
           </Text>
           <Button 
             mode="contained" 
@@ -112,7 +127,7 @@ export default function CameraScreen() {
             labelStyle={{ fontWeight: '800' }}
             icon={() => <Ionicons name="checkmark" size={18} color="#FFFFFF" />}
           >
-            Otorgar Permiso de Cámara
+            Permitir Uso de Cámara
           </Button>
           <Button 
             mode="text" 
@@ -120,7 +135,7 @@ export default function CameraScreen() {
             textColor="#687A74"
             style={{ marginTop: 8 }}
           >
-            Cancelar y Regresar
+            Regresar
           </Button>
         </View>
       </SafeAreaView>
@@ -129,66 +144,109 @@ export default function CameraScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Real Camera Viewfinder Container */}
+      {/* Top Header & Settings Toolbar */}
+      <View style={styles.topToolbar}>
+        <TouchableOpacity style={styles.closeIconButton} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        <View style={styles.brandTitleContainer}>
+          <Ionicons name="leaf-outline" size={16} color="#5EEAD4" style={{ marginRight: 6 }} />
+          <Text style={styles.brandTitleText}>HENOTRACK SCANNER 3.0</Text>
+        </View>
+
+        <View style={styles.topRightControls}>
+          {/* Flash Toggle */}
+          <TouchableOpacity style={styles.toolIconBtn} onPress={toggleFlash}>
+            <Ionicons 
+              name={flash === 'on' ? 'flash' : flash === 'auto' ? 'flash-outline' : 'flash-off-outline'} 
+              size={20} 
+              color={flash !== 'off' ? '#FDE047' : '#E6F4F1'} 
+            />
+          </TouchableOpacity>
+
+          {/* Grid Toggle */}
+          <TouchableOpacity style={styles.toolIconBtn} onPress={() => setShowGrid(!showGrid)}>
+            <Ionicons 
+              name="grid-outline" 
+              size={20} 
+              color={showGrid ? '#5EEAD4' : 'rgba(255,255,255,0.4)'} 
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Main Camera Viewfinder View */}
       <View style={styles.cameraWrapper}>
         <CameraView 
           ref={cameraRef}
           style={StyleSheet.absoluteFillObject}
-          facing="back"
+          facing={facing}
+          enableTorch={flash === 'on'}
         />
 
-        <ThirdsOverlay />
+        {/* Thirds Overlay Grid */}
+        <ThirdsOverlay showGrid={showGrid} />
 
-        {/* Top Header Overlay */}
-        <View style={styles.topControls}>
-          <View style={styles.modeBadge}>
-            <Ionicons name="leaf-outline" size={14} color="#EDF6F1" style={{ marginRight: 6 }} />
-            <Text style={styles.modeText}>HENOTRACK • CÁMARA MÓVIL</Text>
+        {/* Telemetry GPS Overlay Banner */}
+        <View style={styles.telemetryOverlay}>
+          <View style={styles.telemetryHeaderRow}>
+            <View style={styles.gpsSignalDot} />
+            <Ionicons name="location" size={14} color="#5EEAD4" style={{ marginRight: 4 }} />
+            <Text style={styles.telemetryTitle}>TELEMETRÍA GPS DE CAMPO</Text>
           </View>
-
-          <TouchableOpacity style={styles.cancelPill} onPress={() => router.back()}>
-            <Ionicons name="close" size={16} color="#FFFFFF" style={{ marginRight: 2 }} />
-            <Text style={styles.cancelPillText}>CERRAR</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* GPS Badge Overlay */}
-        <View style={styles.gpsContainer}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons name="location" size={16} color="#176B52" style={{ marginRight: 6 }} />
-            <Text style={styles.gpsText}>
-              GPS Real: {location 
-                ? `${location.coords.latitude.toFixed(4)}°N, ${location.coords.longitude.toFixed(4)}°W` 
-                : (locationError || 'Obteniendo GPS...')}
-            </Text>
-          </View>
-          <Text style={styles.gpsSignal}>
+          
+          <Text style={styles.telemetryCoords}>
             {location 
-              ? `Precisión de Lectura: ±${Math.round(location.coords.accuracy || 3)}m` 
-              : 'Conectando con sensor de ubicación...'}
+              ? `${location.coords.latitude.toFixed(4)}°N, ${Math.abs(location.coords.longitude).toFixed(4)}°W` 
+              : (locationError || 'Sincronizando satélites GPS...')}
+          </Text>
+
+          <Text style={styles.telemetryAccuracy}>
+            {location 
+              ? `Precisión de Ubicación: ±${Math.round(location.coords.accuracy || 3)} metros` 
+              : 'Obteniendo mejor precisión disponible...'}
           </Text>
         </View>
       </View>
 
-      {/* Shutter Action Bar */}
-      <View style={styles.controls}>
-        <Text style={styles.instruction}>Encuadre la copa del árbol en los tres niveles de guía</Text>
-        
-        <TouchableOpacity 
-          style={[styles.captureBtn, capturing && { opacity: 0.6 }]} 
-          activeOpacity={0.8} 
-          onPress={handleCapture}
-          disabled={capturing}
-        >
-          {capturing ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="camera" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.captureBtnText}>TOMAR FOTOGRAFÍA DE MUESTRA</Text>
+      {/* Bottom Shutter Controls Panel */}
+      <View style={styles.bottomControls}>
+        <View style={styles.shutterRow}>
+          {/* Flip Camera Button */}
+          <TouchableOpacity style={styles.secondaryCircleBtn} onPress={toggleFacing}>
+            <Ionicons name="camera-reverse-outline" size={24} color="#E6F4F1" />
+          </TouchableOpacity>
+
+          {/* Metallic Emerald Pro Shutter Button */}
+          <TouchableOpacity 
+            style={[styles.outerShutterRing, capturing && { opacity: 0.6 }]}
+            activeOpacity={0.7}
+            onPress={handleCapture}
+            disabled={capturing}
+          >
+            <View style={styles.innerShutterBtn}>
+              {capturing ? (
+                <ActivityIndicator size="small" color="#103F32" />
+              ) : (
+                <Ionicons name="camera" size={28} color="#103F32" />
+              )}
             </View>
-          )}
-        </TouchableOpacity>
+          </TouchableOpacity>
+
+          {/* Flash Mode Indicator Button */}
+          <TouchableOpacity style={styles.secondaryCircleBtn} onPress={toggleFlash}>
+            <Ionicons 
+              name={flash === 'on' ? 'flash' : flash === 'auto' ? 'flash-outline' : 'flash-off-outline'} 
+              size={22} 
+              color={flash !== 'off' ? '#FDE047' : '#E6F4F1'} 
+            />
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.instructionText}>
+          Alinea la copa del árbol en la cuadrilla Hawksworth y captura la muestra
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -197,16 +255,16 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#103F32',
+    backgroundColor: '#0A2921',
   },
   center: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: '#DCE7E1',
+    color: '#5EEAD4',
     marginTop: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   permissionCard: {
     backgroundColor: '#FFFFFF',
@@ -242,103 +300,151 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     width: '100%',
   },
+  topToolbar: {
+    height: 54,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#0A2921',
+  },
+  closeIconButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  brandTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(94, 234, 212, 0.2)',
+  },
+  brandTitleText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    fontSize: 12,
+    letterSpacing: 0.8,
+  },
+  topRightControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  toolIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   cameraWrapper: {
     flex: 1,
     marginHorizontal: 12,
-    marginTop: 8,
+    marginTop: 4,
+    marginBottom: 8,
     borderRadius: 24,
     overflow: 'hidden',
     position: 'relative',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    backgroundColor: '#000',
+    borderWidth: 1.5,
+    borderColor: 'rgba(94, 234, 212, 0.3)',
+    backgroundColor: '#000000',
   },
-  topControls: {
+  telemetryOverlay: {
     position: 'absolute',
-    top: 16,
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    zIndex: 10,
+    bottom: 12,
+    left: 12,
+    right: 12,
+    backgroundColor: 'rgba(10, 41, 33, 0.88)',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(94, 234, 212, 0.3)',
   },
-  modeBadge: {
-    backgroundColor: 'rgba(16, 63, 50, 0.85)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+  telemetryHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 3,
   },
-  modeText: {
+  gpsSignalDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#22C55E',
+    marginRight: 8,
+  },
+  telemetryTitle: {
+    color: '#5EEAD4',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.6,
+  },
+  telemetryCoords: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 11,
-    letterSpacing: 0.5,
+    fontSize: 14,
+    fontWeight: '900',
   },
-  cancelPill: {
-    backgroundColor: 'rgba(16, 63, 50, 0.85)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cancelPillText: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 11,
-  },
-  controls: {
-    height: 120,
-    backgroundColor: '#103F32',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  instruction: {
+  telemetryAccuracy: {
     color: '#DCE7E1',
+    fontSize: 11,
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  bottomControls: {
+    backgroundColor: '#0A2921',
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    alignItems: 'center',
+  },
+  shutterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 24,
+    marginBottom: 12,
+  },
+  secondaryCircleBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  outerShutterRing: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    borderWidth: 3.5,
+    borderColor: '#5EEAD4',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(94, 234, 212, 0.15)',
+  },
+  innerShutterBtn: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#5EEAD4',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  instructionText: {
+    color: '#A3B8B0',
     fontSize: 12,
     fontWeight: '600',
-    marginBottom: 12,
     textAlign: 'center',
-  },
-  captureBtn: {
-    width: '100%',
-    backgroundColor: '#176B52',
-    paddingVertical: 14,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  captureBtnText: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 13,
-    letterSpacing: 0.5,
-  },
-  gpsContainer: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: 'rgba(16, 63, 50, 0.85)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 14,
-    borderLeftWidth: 3,
-    borderLeftColor: '#176B52',
-  },
-  gpsText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  gpsSignal: {
-    color: '#DCE7E1',
-    fontSize: 11,
-    fontWeight: '500',
-    marginTop: 2,
   },
 });
