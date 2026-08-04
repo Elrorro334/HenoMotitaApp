@@ -107,7 +107,8 @@ export default function ProfileScreen() {
             • Rodrigo Domínguez Crespo{'\n'}
             • Rodrigo Sánchez Cruz{'\n'}
             • Jessui Flores Pacheco{'\n'}
-            • Omar Picazo Aranzolo
+            • Omar Picazo Aranzolo{'\n'}
+            • Leonardo
           </Text>
         </View>
         <Divider style={{ marginVertical: 8 }} />
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
   },
   specRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justify.Content: 'space-between',
     alignItems: 'flex-start',
   },
   specLabel: {

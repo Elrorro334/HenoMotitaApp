@@ -32,6 +32,7 @@ El proyecto incluye pipelines automatizados de **Seguridad y CI/CD** basados en 
 - **Rodrigo Sánchez Cruz**
 - **Jessui Flores Pacheco**
 - **Omar Picazo Aranzolo**
+- **Leonardo**
 
 ---
 
@@ -108,4 +109,4 @@ npx react-native log-android
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT estándar definida en el archivo [`LICENSE`](./LICENSE), reconociendo la autoría de la **Universidad Tecnológica de Tula-Tepeji (UTTT)**, las docentes **Dra. Marisol Reséndiz Vega** y **Mtra. Odisey Yasmin Porras**, y el equipo de alumnos desarrolladores de TI (**Dorian Alejandro Trejo Vega**, **Rodrigo Domínguez Crespo**, **Rodrigo Sánchez Cruz**, **Jessui Flores Pacheco** y **Omar Picazo Aranzolo**).
+Este proyecto está bajo la Licencia MIT estándar definida en el archivo [`LICENSE`](./LICENSE), reconociendo la autoría de la **Universidad Tecnológica de Tula-Tepeji (UTTT)**, las docentes **Dra. Marisol Reséndiz Vega** y **Mtra. Odisey Yasmin Porras**, y el equipo de alumnos desarrolladores de TI (**Dorian Alejandro Trejo Vega**, **Rodrigo Domínguez Crespo**, **Rodrigo Sánchez Cruz**, **Jessui Flores Pacheco**, **Omar Picazo Aranzolo** y **Leonardo**).
