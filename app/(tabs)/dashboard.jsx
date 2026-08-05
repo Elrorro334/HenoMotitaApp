@@ -142,7 +142,7 @@ export default function DashboardScreen() {
             </View>
             <View style={styles.statBox}>
               <Ionicons 
-                name={lastObsScore >= 4 ? 'alert-circle' : (lastObsScore > 0 ? 'star' : 'seedling')} 
+                name={lastObsScore >= 4 ? 'alert-circle' : (lastObsScore > 0 ? 'star' : 'checkmark-circle')} 
                 size={28} 
                 color={lastObsScore >= 4 ? colors.errorBorder : (lastObsScore > 0 ? colors.warningText : colors.primaryHover)} 
                 style={{ marginBottom: spacing.xs }} 
