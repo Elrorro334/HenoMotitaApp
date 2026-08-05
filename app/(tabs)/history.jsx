@@ -189,8 +189,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
     borderBottomWidth: 1,
     borderColor: colors.borderLight,
-    borderLeftWidth: layout.panelAccentBorderWidth,
-    borderLeftColor: colors.accentGreen,
   },
   pillTag: {
     flexDirection: 'row',
@@ -272,8 +270,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderLight,
     borderTopWidth: 0,
-    borderLeftWidth: layout.panelAccentBorderWidth,
-    borderLeftColor: colors.primary,
   },
   doctorReviewTitle: {
     fontFamily: fonts.base,
