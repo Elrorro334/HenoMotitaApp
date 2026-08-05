@@ -105,7 +105,7 @@ export default function ProfileScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.menuText, { color: colors.errorBorder }]}>Cerrar Sesión</Text>
-                <Text style={styles.menuSub}>Desconectar token JWT y salir del sistema</Text>
+                <Text style={styles.menuSub}>Cerrar sesión de forma segura</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.errorBorder} />
             </TouchableOpacity>
