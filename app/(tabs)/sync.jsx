@@ -602,8 +602,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
     borderBottomWidth: 1,
     borderColor: colors.borderLight,
-    borderLeftWidth: layout.panelAccentBorderWidth,
-    borderLeftColor: colors.accentGreen,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -658,8 +656,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.card,
     borderWidth: 1,
     borderColor: colors.borderLight,
-    borderLeftWidth: layout.panelAccentBorderWidth,
-    borderLeftColor: colors.accentGreen,
   },
   cardContent: {
     padding: spacing.md,
@@ -778,8 +774,6 @@ const styles = StyleSheet.create({
     elevation: 12,
     borderWidth: 1,
     borderColor: colors.borderLight,
-    borderLeftWidth: layout.panelAccentBorderWidth,
-    borderLeftColor: colors.accentGreen,
   },
   modalHeader: {
     flexDirection: 'row',
