@@ -78,4 +78,19 @@ Al generar código:
 1. **No inventes dependencias.** Usa las ya instaladas en el `package.json` o solicita permiso explícitamente para añadir una nueva.
 2. **Piensa paso a paso.** Si te piden una funcionalidad compleja (ej. "Sincronización de fotos"), primero diseña cómo se guardarán en AsyncStorage y luego cómo se enviarán en batch.
 3. **Optimiza los imports.** Asegúrate de importar correctamente desde `react`, `react-native`, y `expo-router`.
-4. Siempre que se pueda, desglosa componentes grandes en piezas más pequeñas dentro de la carpeta `components/`.
+8. Siempre que se pueda, desglosa componentes grandes en piezas más pequeñas dentro de la carpeta `components/`.
+
+---
+
+## 🧠 6. Reglas de UX/UI y Psicología de Producto
+
+### 6.1 Patrones Adictivos y Modernos
+- Prioriza diseños orientados a la acción. El CTA (Call to Action) principal debe ser lo más destacable en pantalla (estilo "Start" de Duolingo).
+- Minimiza el estrés cognitivo: oculta los datos técnicos (ej. IDs, descripciones legales) en menús secundarios, Tooltips o modales. Muestra solo información esencial ("Glanceable") en los Dashboards.
+- Emplea gamificación: trata las métricas como rachas (streaks), niveles de salud o progreso visual.
+- Personalización: la app debe hablarle al usuario ("Hola [Nombre]", "Tu Árbol"), generando sentido de pertenencia y conexión con el elemento monitoreado.
+
+### 6.2 Iconografía Profesional vs Emojis
+- **PROHIBIDO EL USO DE EMOJIS** en la interfaz de usuario (ej. 🌳, 📝, ⭐, 👋, 🌿). Los emojis restan seriedad, son inconsistentes entre sistemas operativos y se ven poco profesionales.
+- Utiliza **ÚNICAMENTE** iconos del paquete vector-icons ya instalado en Expo (`@expo/vector-icons`), como `Ionicons` o `MaterialCommunityIcons`.
+- Los iconos deben seguir el sistema de color del tema, usualmente pintados con `colors.primary`, `colors.primaryHover`, o los colores de acento correspondientes.

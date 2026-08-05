@@ -103,7 +103,7 @@ export default function DashboardScreen() {
           {/* 1. Header Limpio (Top Bar) */}
           <View style={styles.topBar}>
             <View style={styles.greetingCol}>
-              <Text style={styles.greetingText}>¡Hola, {studentName.split(' ')[0]}! 👋</Text>
+              <Text style={styles.greetingText}>¡Hola, {studentName.split(' ')[0]}!</Text>
               <Text style={styles.subGreeting}>Listo para proteger tus árboles</Text>
             </View>
             {/* Si no tienes Avatar, este círculo sirve perfecto */}
@@ -131,17 +131,22 @@ export default function DashboardScreen() {
           {/* 3. Estadísticas Rápidas (Gamificadas) */}
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
-              <Text style={styles.statEmoji}>🌳</Text>
+              <Ionicons name="leaf" size={28} color={colors.primaryHover} style={{ marginBottom: spacing.xs }} />
               <Text style={styles.statValue}>{trees.length}</Text>
               <Text style={styles.statLabel}>Árboles</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statEmoji}>📝</Text>
+              <Ionicons name="document-text" size={28} color={colors.primaryHover} style={{ marginBottom: spacing.xs }} />
               <Text style={styles.statValue}>{recentEvaluations.length}</Text>
               <Text style={styles.statLabel}>Registros</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statEmoji}>{lastObsScore >= 4 ? '⚠️' : (lastObsScore > 0 ? '⭐' : '🌱')}</Text>
+              <Ionicons 
+                name={lastObsScore >= 4 ? 'alert-circle' : (lastObsScore > 0 ? 'star' : 'seedling')} 
+                size={28} 
+                color={lastObsScore >= 4 ? colors.errorBorder : (lastObsScore > 0 ? colors.warningText : colors.primaryHover)} 
+                style={{ marginBottom: spacing.xs }} 
+              />
               <Text style={styles.statValue}>{lastObsScore > 0 ? `${lastObsScore}/6` : '-'}</Text>
               <Text style={styles.statLabel}>Salud</Text>
             </View>
@@ -187,7 +192,7 @@ export default function DashboardScreen() {
               </View>
             ) : recentEvaluations.length === 0 ? (
               <View style={styles.emptyFeedBox}>
-                <Text style={styles.emptyFeedEmoji}>🌿</Text>
+                <Ionicons name="leaf-outline" size={48} color={colors.primaryHover} style={{ marginBottom: spacing.md }} />
                 <Text style={styles.emptyFeedTitle}>¡Todo listo para empezar!</Text>
                 <Text style={styles.emptyFeedSub}>Haz tu primera inspección para verla aquí.</Text>
               </View>
