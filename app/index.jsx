@@ -279,124 +279,99 @@ export default function LoginScreen() {
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={[styles.mainWrapper, isDesktop && styles.desktopMainWrapper]}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} bounces={false}>
+        
+        {/* Top Dark Green Banner */}
+        <View style={[styles.headerBanner, isDesktop && styles.desktopHeaderBanner]}>
+          <Text style={styles.bannerPreTitle}>MONITOREO AMBIENTAL</Text>
+          <Text style={styles.bannerTitle}>Heno Motita</Text>
+          <Text style={styles.bannerSubtitle}>Gestión de cuadrillas y observaciones Hawksworth para el monitoreo de líquenes.</Text>
+        </View>
 
-          {/* Brand Header Panel */}
-          <View style={[
-            styles.headerBlock, 
-            isDesktop ? styles.desktopHeaderBlock : { minHeight: Math.max(height * 0.38, 260) }
-          ]}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="leaf" size={44} color={colors.textOnGreen} />
-            </View>
-            <Text style={styles.institutionCode}>UTTT • VALLE DEL MEZQUITAL</Text>
-            <Text style={styles.mainTitle}>HenoTrack</Text>
-            <Text style={styles.subtitle}>Monitoreo y Conservación Fitosanitaria</Text>
+        {/* Bottom Form Section */}
+        <View style={styles.formSection}>
+          <View style={styles.formContainer}>
+            <Text style={styles.formPreTitle}>ACCESO DE ALUMNOS</Text>
+            <Text style={styles.formTitle}>Inicia tu sesión</Text>
             
-            {isDesktop && (
-              <View style={styles.desktopDecorationBox}>
-                <Text style={styles.desktopDecorationText}>
-                  Sistema de geolocalización, captura y evaluación de Tillandsia recurvata en la red ambiental universitaria.
-                </Text>
+            {loginError ? (
+              <View style={styles.errorBox}>
+                <Ionicons name="alert-circle" size={18} color={colors.errorBorder} style={{ marginRight: 6 }} />
+                <Text style={styles.errorText}>{loginError}</Text>
               </View>
-            )}
-          </View>
+            ) : null}
 
-          {/* Form Container Column */}
-          <View style={[styles.formColumn, isDesktop && styles.desktopFormColumn]}>
-            
-            {/* Form Card */}
-            <View style={styles.cardForm}>
-              {preLoginPhrase ? (
-                <View style={styles.phraseBubble}>
-                  <Ionicons name="sunny-outline" size={16} color={colors.primary} style={{ marginRight: 6 }} />
-                  <Text style={styles.phraseText}>{preLoginPhrase}</Text>
-                </View>
-              ) : null}
-
-              <>
-                  <Text style={styles.formLegend}>Te damos la bienvenida</Text>
-
-                  {loginError ? (
-                    <View style={styles.errorBox}>
-                      <Ionicons name="alert-circle" size={18} color={colors.errorBorder} style={{ marginRight: 6 }} />
-                      <Text style={styles.errorText}>{loginError}</Text>
-                    </View>
-                  ) : null}
-
-                  <TextInput
-                    label="Correo Institucional"
-                    placeholder="usuario@uttt.edu.mx"
-                    value={email}
-                    onChangeText={setEmail}
-                    mode="outlined"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    outlineStyle={styles.inputOutline}
-                    style={styles.input}
-                    activeOutlineColor={colors.focusGreen}
-                    outlineColor={colors.borderLight}
-                    left={<TextInput.Icon icon={() => <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />} />}
-                  />
-
-                  <TextInput
-                    label="Contraseña"
-                    placeholder="Tu contraseña"
-                    value={password}
-                    onChangeText={setPassword}
-                    mode="outlined"
-                    secureTextEntry
-                    outlineStyle={styles.inputOutline}
-                    style={styles.input}
-                    activeOutlineColor={colors.focusGreen}
-                    outlineColor={colors.borderLight}
-                    left={<TextInput.Icon icon={() => <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />} />}
-                  />
-
-                  <Button 
-                    mode="contained" 
-                    onPress={handleLogin} 
-                    loading={loginLoading}
-                    disabled={loginLoading || !email.trim() || !password}
-                    buttonColor={colors.primary}
-                    style={styles.button}
-                    labelStyle={styles.buttonLabel}
-                    contentStyle={{ paddingVertical: 10 }}
-                    icon={() => <Ionicons name="log-in-outline" size={20} color={colors.mainSurface} />}
-                  >
-                    Iniciar Sesión
-                  </Button>
-                </>
-
-              <View style={{ marginTop: spacing.xxl, alignItems: 'center' }}>
-                <Text style={{ fontFamily: fonts.base, color: colors.textSecondary, marginBottom: spacing.xs, fontSize: 13 }}>
-                  ¿Aún no tienes cuenta?
-                </Text>
-                <Button
-                  mode="text"
-                  onPress={() => Linking.openURL('https://heno-motita-frontend.onrender.com/#alumnos')}
-                  textColor={colors.focusGreen}
-                  style={{ margin: 0, padding: 0 }}
-                  labelStyle={{ fontFamily: fonts.base, fontWeight: '600', fontSize: 14 }}
-                >
-                  Activar cuenta en la Web
-                </Button>
+            {preLoginPhrase ? (
+              <View style={styles.phraseBubble}>
+                <Ionicons name="sunny-outline" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                <Text style={styles.phraseText}>{preLoginPhrase}</Text>
               </View>
+            ) : null}
 
-              {/* Quick link back to info onboarding */}
-              <TouchableOpacity 
-                onPress={() => { setShowInfo(true); setSlideIndex(0); }} 
-                style={styles.backInfoBtn}
-                activeOpacity={0.7}
+            <Text style={styles.inputLabel}>Correo electrónico</Text>
+            <TextInput
+              placeholder="usuario@uttt.edu.mx"
+              value={email}
+              onChangeText={setEmail}
+              mode="outlined"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              outlineStyle={styles.cleanOutline}
+              style={styles.cleanInput}
+              activeOutlineColor={colors.primary}
+              outlineColor={colors.borderLight}
+            />
+
+            <Text style={styles.inputLabel}>Contraseña</Text>
+            <TextInput
+              placeholder="Tu contraseña"
+              value={password}
+              onChangeText={setPassword}
+              mode="outlined"
+              secureTextEntry
+              outlineStyle={styles.cleanOutline}
+              style={styles.cleanInput}
+              activeOutlineColor={colors.primary}
+              outlineColor={colors.borderLight}
+            />
+
+            <Button 
+              mode="contained" 
+              onPress={handleLogin} 
+              loading={loginLoading}
+              disabled={loginLoading || !email.trim() || !password}
+              buttonColor={colors.primary}
+              style={styles.loginBtn}
+              labelStyle={styles.loginBtnLabel}
+              contentStyle={{ paddingVertical: 8 }}
+            >
+              Iniciar Sesión
+            </Button>
+
+            <View style={styles.activateRow}>
+              <Button
+                mode="text"
+                onPress={() => Linking.openURL('https://heno-motita-frontend.onrender.com/#alumnos')}
+                textColor={colors.focusGreen}
+                style={{ margin: 0, padding: 0 }}
+                labelStyle={{ fontFamily: fonts.base, fontWeight: '600', fontSize: 14 }}
               >
-                <Ionicons name="information-circle-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-                <Text style={styles.backInfoText}>Ver información del Heno Motita</Text>
-              </TouchableOpacity>
+                Activar cuenta en la Web
+              </Button>
             </View>
+
+            <TouchableOpacity 
+              onPress={() => { setShowInfo(true); setSlideIndex(0); }} 
+              style={styles.infoLinkRow}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="information-circle-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+              <Text style={styles.infoLinkText}>Ver información del Heno Motita</Text>
+            </TouchableOpacity>
 
           </View>
         </View>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -405,104 +380,121 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.mainSurface,
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xxxl,
-    alignItems: 'center',
+    backgroundColor: colors.mainSurface,
   },
-  mainWrapper: {
-    width: '100%',
-    maxWidth: layout.contentMaxWidthUnauth,
-    alignItems: 'center',
-  },
-  desktopMainWrapper: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    justifyContent: 'center',
-    gap: spacing.xxxl,
-  },
-  headerBlock: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xl,
+  headerBanner: {
+    backgroundColor: colors.primaryHover, 
+    paddingHorizontal: spacing.xxxl,
+    paddingTop: 80,
+    paddingBottom: 60,
     width: '100%',
   },
-  desktopHeaderBlock: {
-    flex: 1,
-    minWidth: layout?.desktopLoginMinCols?.left || 320,
-    backgroundColor: colors.headerGreen,
-    borderRadius: borderRadius.modal,
-    padding: spacing.xxxl,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    shadowColor: colors.headerGreen,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 4,
+  desktopHeaderBanner: {
+    paddingHorizontal: '15%',
+    paddingTop: 100,
+    paddingBottom: 80,
   },
-  iconCircle: {
-    width: 76,
-    height: 76,
-    borderRadius: borderRadius.circle,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    shadowColor: colors.headerGreen,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  institutionCode: {
+  bannerPreTitle: {
     fontFamily: fonts.base,
-    color: colors.textSecondaryAlt,
+    color: colors.textOnGreen,
     fontWeight: '650',
-    letterSpacing: 1.5,
+    letterSpacing: 2,
+    fontSize: 11,
+    textTransform: 'uppercase',
+    marginBottom: spacing.sm,
+  },
+  bannerTitle: {
+    fontFamily: fonts.display,
+    fontWeight: '700',
+    color: colors.mainSurface,
+    fontSize: 48,
+    letterSpacing: -1.5,
+    lineHeight: 48,
+    marginBottom: spacing.lg,
+  },
+  bannerSubtitle: {
+    fontFamily: fonts.base,
+    color: colors.textOnGreen,
+    fontSize: 15,
+    lineHeight: 22,
+    maxWidth: 350,
+  },
+  formSection: {
+    flex: 1,
+    backgroundColor: colors.mainSurface,
+    paddingHorizontal: spacing.xxxl,
+    paddingTop: spacing.xxxl,
+    paddingBottom: spacing.xxxl,
+    alignItems: 'center',
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: 400,
+  },
+  formPreTitle: {
+    fontFamily: fonts.base,
+    color: colors.textSecondary,
+    fontWeight: '650',
+    letterSpacing: 2,
     fontSize: 11,
     textTransform: 'uppercase',
     marginBottom: spacing.xs,
   },
-  mainTitle: {
+  formTitle: {
     fontFamily: fonts.display,
     fontWeight: '600',
-    textAlign: 'center',
     color: colors.headerGreen,
-    fontSize: 44, // clamp fallback
-    letterSpacing: -1.2, // -.06em
-    lineHeight: 44 * 0.95,
+    fontSize: 32,
+    letterSpacing: -0.5,
+    marginBottom: spacing.xl,
   },
-  subtitle: {
+  inputLabel: {
     fontFamily: fonts.base,
-    textAlign: 'center',
-    color: colors.textSecondary,
-    fontWeight: '500',
-    fontSize: 14,
-    marginTop: spacing.xs,
-  },
-  desktopDecorationBox: {
-    marginTop: spacing.xxxl,
-    backgroundColor: colors.primaryHover,
-    padding: spacing.lg,
-    borderRadius: borderRadius.input,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.accentGreen,
-  },
-  desktopDecorationText: {
-    fontFamily: fonts.base,
+    color: colors.textPrimary,
+    fontWeight: '650',
     fontSize: 13,
-    color: colors.textOnGreen,
-    lineHeight: 20,
+    marginBottom: 4,
   },
-  formColumn: {
-    width: '100%',
-    maxWidth: 400,
+  cleanInput: {
+    backgroundColor: colors.mainSurface,
+    marginBottom: spacing.lg,
+    fontSize: 15,
+    height: 48,
+  },
+  cleanOutline: {
+    borderRadius: borderRadius.input,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+  },
+  loginBtn: {
+    marginTop: spacing.sm,
+    borderRadius: borderRadius.button,
+  },
+  loginBtnLabel: {
+    fontFamily: fonts.base,
+    fontWeight: '600',
+    fontSize: 15,
+    letterSpacing: 0.5,
+  },
+  activateRow: {
+    marginTop: spacing.xxl,
     alignItems: 'center',
+  },
+  infoLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.xxl,
+  },
+  infoLinkText: {
+    fontFamily: fonts.base,
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '650',
   },
   desktopFormColumn: {
     flex: 1,
