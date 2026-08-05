@@ -370,8 +370,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xxl,
     borderWidth: 1,
     borderColor: colors.borderLight,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.accentGreen,
   },
   careHeader: {
     flexDirection: 'row',
