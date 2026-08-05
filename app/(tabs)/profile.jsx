@@ -91,73 +91,6 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* Institutional Research Project Info */}
-          <View style={styles.sectionHeader}>
-            <Ionicons name="flask-outline" size={20} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={styles.sectionTitle}>Proyecto de Investigación UTTT</Text>
-          </View>
-
-          <View style={styles.infoCard}>
-            <View style={styles.specRow}>
-              <Text style={styles.specLabel}>PROYECTO:</Text>
-              <Text style={styles.specVal}>Monitoreo y Control Fitosanitario de Heno Motita (*Tillandsia recurvata*)</Text>
-            </View>
-            <Divider style={{ marginVertical: spacing.sm, backgroundColor: colors.borderLight }} />
-            <View style={styles.specRow}>
-              <Text style={styles.specLabel}>DOCENTES INVESTIGADORAS:</Text>
-              <Text style={styles.specVal}>Dra. Marisol Reséndiz Vega{'\n'}Mtra. Odisey Yasmin Porras</Text>
-            </View>
-            <Divider style={{ marginVertical: spacing.sm, backgroundColor: colors.borderLight }} />
-            <View style={styles.specRow}>
-              <Text style={styles.specLabel}>DESARROLLADORES TI:</Text>
-              <Text style={styles.specVal}>
-                • Dorian Alejandro Trejo Vega{'\n'}
-                • Rodrigo Domínguez Crespo{'\n'}
-                • Rodrigo Sánchez Cruz{'\n'}
-                • Jessui Flores Pacheco{'\n'}
-                • Omar Picazo Aranzolo{'\n'}
-                • Leonardo
-              </Text>
-            </View>
-            <Divider style={{ marginVertical: spacing.sm, backgroundColor: colors.borderLight }} />
-            <View style={styles.specRow}>
-              <Text style={styles.specLabel}>MUNICIPIOS (8):</Text>
-              <Text style={styles.specVal}>Tula, Tepeji, Atitalaquia, Tlaxcoapan, Tepetitlán, Tezontepec, Tlahuelilpan, Atotonilco</Text>
-            </View>
-            <Divider style={{ marginVertical: spacing.sm, backgroundColor: colors.borderLight }} />
-            <View style={styles.specRow}>
-              <Text style={styles.specLabel}>ESPECIES EVALUADAS:</Text>
-              <Text style={styles.specVal}>Mezquites, Huizaches, Nopales y especies infestadas</Text>
-            </View>
-            <Divider style={{ marginVertical: spacing.sm, backgroundColor: colors.borderLight }} />
-            <View style={styles.specRow}>
-              <Text style={styles.specLabel}>RED INTERINSTITUCIONAL:</Text>
-              <Text style={styles.specVal}>UTTT, CECYTE, CETAC 2, COBAEH, UAEH</Text>
-            </View>
-            <Divider style={{ marginVertical: spacing.sm, backgroundColor: colors.borderLight }} />
-            <View style={styles.specRow}>
-              <Text style={styles.specLabel}>FRECUENCIA DE INSPECCIÓN:</Text>
-              <Text style={styles.specVal}>Cada 15 Días (Escala Hawksworth 0 a 6)</Text>
-            </View>
-          </View>
-
-          {/* System Specifications */}
-          <View style={styles.sectionHeader}>
-            <Ionicons name="shield-checkmark-outline" size={20} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={styles.sectionTitle}>Metadatos del Sistema</Text>
-          </View>
-
-          <View style={styles.infoCard}>
-            <View style={styles.specRow}>
-              <Text style={styles.specLabel}>APLICACIÓN MÓVIL:</Text>
-              <Text style={styles.specVal}>HenoTrack v1.0 (Bare Native / Expo)</Text>
-            </View>
-            <Divider style={{ marginVertical: spacing.sm, backgroundColor: colors.borderLight }} />
-            <View style={styles.specRow}>
-              <Text style={styles.specLabel}>ESTADO DE SERVICIO:</Text>
-              <Text style={styles.specVal}>Conexión Activa a Plataforma Central API</Text>
-            </View>
-          </View>
 
           {/* Options & Logout */}
           <View style={styles.sectionHeader}>
@@ -203,8 +136,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: borderRadius.card,
     borderWidth: 1,
     borderColor: colors.borderLight,
-    borderLeftWidth: layout.panelAccentBorderWidth,
-    borderLeftColor: colors.accentGreen,
     shadowColor: colors.headerGreen,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.03,
@@ -299,8 +230,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.card,
     borderWidth: 1,
     borderColor: colors.borderLight,
-    borderLeftWidth: layout.panelAccentBorderWidth,
-    borderLeftColor: colors.accentGreen,
     marginBottom: spacing.md,
   },
   infoRow: {
