@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    justify.Content: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.xs,
   },
