@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   },
   desktopHeaderBlock: {
     flex: 1,
-    minWidth: layout.desktopLoginMinCols.left,
+    minWidth: layout?.desktopLoginMinCols?.left || 320,
     backgroundColor: colors.headerGreen,
     borderRadius: borderRadius.modal,
     padding: spacing.xxxl,
@@ -634,7 +634,7 @@ const styles = StyleSheet.create({
   },
   desktopFormColumn: {
     flex: 1,
-    minWidth: layout.desktopLoginMinCols.right,
+    minWidth: layout?.desktopLoginMinCols?.right || 280,
   },
   segmentedToggleContainer: {
     flexDirection: 'row',

@@ -36,15 +36,13 @@ export const colors = {
 
 export const fonts = {
   base: Platform.select({
-    web: 'Aptos, "Segoe UI", ui-sans-serif, system-ui, sans-serif',
-    ios: 'Aptos',
-    android: 'Aptos',
+    ios: 'System',
+    android: 'sans-serif',
     default: 'sans-serif',
   }),
   display: Platform.select({
-    web: '"Aptos Display", Aptos, "Segoe UI", sans-serif',
-    ios: 'Aptos Display',
-    android: 'Aptos Display',
+    ios: 'System',
+    android: 'sans-serif-medium',
     default: 'sans-serif',
   }),
 };
@@ -74,7 +72,23 @@ export const layout = {
   breakpoint: 720,
   contentMaxWidthUnauth: 928, // 58rem
   contentMaxWidthAuth: 1440,  // 90rem
+  mobileBrandPanelMinHeight: 260,
+  desktopLoginMinCols: { left: 320, right: 280 },
   panelAccentBorderWidth: 3,
+};
+
+export const shadows = {
+  modal: {
+    shadowColor: 'rgb(23, 53, 38)',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.28,
+    shadowRadius: 32,
+    elevation: 12,
+  },
+  focusRing: {
+    borderColor: '#4d855f',
+    borderWidth: 3,
+  },
 };
 
 export const paperTheme = {
