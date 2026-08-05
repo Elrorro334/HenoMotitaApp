@@ -4,7 +4,6 @@ import { TextInput, Button, Text, Card, Chip, ProgressBar } from 'react-native-p
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { activateStudent } from '../services/api';
 import { getRandomPhrase } from '../services/timePhrases';
 import { colors, fonts, spacing, borderRadius, layout, shadows } from '../constants/theme';
 
@@ -14,7 +13,6 @@ export default function LoginScreen() {
 
   const [showInfo, setShowInfo] = useState(true);
   const [slideIndex, setSlideIndex] = useState(0); // 0 | 1 | 2
-  const [mode, setMode] = useState('login'); // 'login' | 'activate'
   const [preLoginPhrase, setPreLoginPhrase] = useState('');
   
   useEffect(() => {
@@ -26,12 +24,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
-
-  // Activation fields
-  const [activationCode, setActivationCode] = useState('');
-  const [studentName, setStudentName] = useState('');
-  const [enrollment, setEnrollment] = useState('');
-  const [activateLoading, setActivateLoading] = useState(false);
 
   const router = useRouter();
   const { loginUser } = useAuth();
@@ -52,33 +44,7 @@ export default function LoginScreen() {
     }
   };
 
-  const handleActivate = async () => {
-    if (!activationCode.trim() || !email.trim() || !password || !studentName.trim()) {
-      Alert.alert('Datos Incompletos', 'Por favor llena todos los campos obligatorios para activar tu cuenta.');
-      return;
-    }
-
-    setActivateLoading(true);
-    try {
-      await activateStudent({
-        activationCode: activationCode.trim(),
-        email: email.trim(),
-        password,
-        name: studentName.trim(),
-        enrollment: enrollment.trim(),
-      });
-
-      Alert.alert(
-        'Cuenta Activada',
-        'Tu cuenta ha sido registrada exitosamente. Ya puedes iniciar sesión.',
-        [{ text: 'Entendido', onPress: () => setMode('login') }]
-      );
-    } catch (error) {
-      Alert.alert('Error de Activación', error.message || 'Código de activación inválido o ya utilizado.');
-    } finally {
-      setActivateLoading(false);
-    }
-  };
+  // Activation logic moved to web
 
   const openMoreInfo = () => {
     Linking.openURL('http://www.henomotita.mx/').catch((err) =>
@@ -340,26 +306,6 @@ export default function LoginScreen() {
           {/* Form Container Column */}
           <View style={[styles.formColumn, isDesktop && styles.desktopFormColumn]}>
             
-            {/* Custom Segmented Pill Tab Toggle */}
-            <View style={styles.segmentedToggleContainer}>
-              <TouchableOpacity 
-                style={[styles.segmentedTab, mode === 'login' && styles.segmentedTabActive]} 
-                onPress={() => setMode('login')}
-              >
-                <Text style={[styles.segmentedTabText, mode === 'login' && styles.segmentedTabTextActive]}>
-                  Iniciar Sesión
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.segmentedTab, mode === 'activate' && styles.segmentedTabActive]} 
-                onPress={() => setMode('activate')}
-              >
-                <Text style={[styles.segmentedTabText, mode === 'activate' && styles.segmentedTabTextActive]}>
-                  Activar Cuenta
-                </Text>
-              </TouchableOpacity>
-            </View>
-
             {/* Form Card */}
             <View style={styles.cardForm}>
               {preLoginPhrase ? (
@@ -369,8 +315,7 @@ export default function LoginScreen() {
                 </View>
               ) : null}
 
-              {mode === 'login' ? (
-                <>
+              <>
                   <Text style={styles.formLegend}>Te damos la bienvenida</Text>
 
                   {loginError ? (
@@ -423,94 +368,21 @@ export default function LoginScreen() {
                     Iniciar Sesión
                   </Button>
                 </>
-              ) : (
-                <>
-                  <Text style={styles.formLegend}>Registro de Estudiante</Text>
 
-                  <TextInput
-                    label="Código de Activación *"
-                    placeholder="Código entregado por tu encargado"
-                    value={activationCode}
-                    onChangeText={setActivationCode}
-                    mode="outlined"
-                    autoCapitalize="characters"
-                    outlineStyle={styles.inputOutline}
-                    style={styles.input}
-                    activeOutlineColor={colors.focusGreen}
-                    outlineColor={colors.borderLight}
-                    left={<TextInput.Icon icon={() => <Ionicons name="key-outline" size={20} color={colors.textSecondary} />} />}
-                  />
-
-                  <TextInput
-                    label="Nombre Completo *"
-                    placeholder="Nombre(s) y Apellidos"
-                    value={studentName}
-                    onChangeText={setStudentName}
-                    mode="outlined"
-                    outlineStyle={styles.inputOutline}
-                    style={styles.input}
-                    activeOutlineColor={colors.focusGreen}
-                    outlineColor={colors.borderLight}
-                    left={<TextInput.Icon icon={() => <Ionicons name="person-outline" size={20} color={colors.textSecondary} />} />}
-                  />
-
-                  <TextInput
-                    label="Matrícula *"
-                    placeholder="Tu matrícula institucional"
-                    value={enrollment}
-                    onChangeText={setEnrollment}
-                    mode="outlined"
-                    outlineStyle={styles.inputOutline}
-                    style={styles.input}
-                    activeOutlineColor={colors.focusGreen}
-                    outlineColor={colors.borderLight}
-                    left={<TextInput.Icon icon={() => <Ionicons name="card-outline" size={20} color={colors.textSecondary} />} />}
-                  />
-
-                  <TextInput
-                    label="Correo Institucional *"
-                    placeholder="correo@uttt.edu.mx"
-                    value={email}
-                    onChangeText={setEmail}
-                    mode="outlined"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    outlineStyle={styles.inputOutline}
-                    style={styles.input}
-                    activeOutlineColor={colors.focusGreen}
-                    outlineColor={colors.borderLight}
-                    left={<TextInput.Icon icon={() => <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />} />}
-                  />
-
-                  <TextInput
-                    label="Contraseña *"
-                    placeholder="Crea una contraseña"
-                    value={password}
-                    onChangeText={setPassword}
-                    mode="outlined"
-                    secureTextEntry
-                    outlineStyle={styles.inputOutline}
-                    style={styles.input}
-                    activeOutlineColor={colors.focusGreen}
-                    outlineColor={colors.borderLight}
-                    left={<TextInput.Icon icon={() => <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />} />}
-                  />
-
-                  <Button 
-                    mode="contained" 
-                    onPress={handleActivate} 
-                    loading={activateLoading}
-                    disabled={activateLoading || !activationCode.trim()}
-                    buttonColor={colors.primary}
-                    style={styles.button}
-                    labelStyle={styles.buttonLabel}
-                    contentStyle={{ paddingVertical: 10 }}
-                    icon={() => <Ionicons name="checkmark-circle-outline" size={20} color={colors.mainSurface} />}
-                  >
-                    Activar Cuenta
-                  </Button>
-                </>
-              )}
+              <View style={{ marginTop: spacing.xxl, alignItems: 'center' }}>
+                <Text style={{ fontFamily: fonts.base, color: colors.textSecondary, marginBottom: spacing.xs, fontSize: 13 }}>
+                  ¿Aún no tienes cuenta?
+                </Text>
+                <Button
+                  mode="text"
+                  onPress={() => Linking.openURL('https://heno-motita-frontend.onrender.com/#alumnos')}
+                  textColor={colors.focusGreen}
+                  style={{ margin: 0, padding: 0 }}
+                  labelStyle={{ fontFamily: fonts.base, fontWeight: '600', fontSize: 14 }}
+                >
+                  Activar cuenta en la Web
+                </Button>
+              </View>
 
               {/* Quick link back to info onboarding */}
               <TouchableOpacity 
