@@ -36,13 +36,15 @@ export const colors = {
 
 export const fonts = {
   base: Platform.select({
-    ios: 'System',
-    android: 'sans-serif',
+    web: 'Aptos, "Segoe UI", ui-sans-serif, system-ui, sans-serif',
+    ios: 'Aptos',
+    android: 'Aptos',
     default: 'sans-serif',
   }),
   display: Platform.select({
-    ios: 'System',
-    android: 'sans-serif-medium',
+    web: '"Aptos Display", Aptos, "Segoe UI", sans-serif',
+    ios: 'Aptos Display',
+    android: 'Aptos Display',
     default: 'sans-serif',
   }),
 };
