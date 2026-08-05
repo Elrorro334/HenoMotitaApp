@@ -51,7 +51,7 @@ export default function EvaluationCard({ evaluation }) {
   const statusCfg = getStatusConfig(totalScore);
 
   return (
-    <Card style={[styles.card, { borderLeftWidth: 3, borderLeftColor: statusCfg.borderColor }]} mode="contained">
+    <Card style={styles.card} mode="contained">
       <Card.Content style={styles.cardContent}>
         <View style={styles.rowTop}>
           <View style={styles.infoCol}>
@@ -72,7 +72,7 @@ export default function EvaluationCard({ evaluation }) {
           </View>
         </View>
 
-        <View style={[styles.recommendationBox, { borderLeftColor: statusCfg.borderColor }]}>
+        <View style={styles.recommendationBox}>
           <Text style={styles.recommendationLabel}>DIAGNÓSTICO Y ACCIÓN TÉCNICA:</Text>
           <Text style={styles.recommendationText} numberOfLines={2}>
             {statusCfg.rec}
@@ -156,8 +156,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.panelSurface,
     padding: 12,
     borderRadius: borderRadius.input,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.accentGreen,
   },
   recommendationLabel: {
     fontFamily: fonts.base,
@@ -180,8 +178,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.secondaryButton,
     padding: 10,
     borderRadius: borderRadius.input,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
   },
   commentsLabel: {
     fontFamily: fonts.base,
