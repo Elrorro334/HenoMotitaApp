@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, fonts, borderRadius } from '../constants/theme';
 
 export default function EvaluationCard({ evaluation }) {
   // Extract fields from either raw backend observation response or formatted object
@@ -15,28 +16,31 @@ export default function EvaluationCard({ evaluation }) {
     ? new Date(rawDate).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
     : 'Fecha desconocida';
 
-  // Severity config based on Hawksworth 0-6 score
+  // Severity config based on Hawksworth 0-6 score using user palette
   const getStatusConfig = (score) => {
     if (score >= 4) {
       return { 
-        bg: '#FEE2E2', 
-        text: '#DC2626', 
+        bg: colors.errorBg, 
+        text: colors.errorText,
+        borderColor: colors.errorBorder,
         label: 'SEVERO', 
         icon: 'alert-circle',
         rec: 'Poda sanitaria inmediata del dosel afectado e inspección intensiva.'
       };
     } else if (score >= 2) {
       return { 
-        bg: '#FEF3C7', 
-        text: '#D97706', 
+        bg: colors.warningBg, 
+        text: colors.warningText, 
+        borderColor: colors.warningText,
         label: 'MODERADO', 
         icon: 'warning',
         rec: 'Remoción manual selectiva de heno motita y seguimiento quincenal.'
       };
     } else {
       return { 
-        bg: '#DCFCE7', 
-        text: '#16A34A', 
+        bg: colors.positiveBg, 
+        text: colors.positiveText, 
+        borderColor: colors.positiveText,
         label: 'LEVE / SANO', 
         icon: 'checkmark-circle',
         rec: 'Monitoreo preventivo mensual y preservación de salud foliar.'
@@ -47,7 +51,7 @@ export default function EvaluationCard({ evaluation }) {
   const statusCfg = getStatusConfig(totalScore);
 
   return (
-    <Card style={styles.card} mode="contained">
+    <Card style={[styles.card, { borderLeftWidth: 3, borderLeftColor: statusCfg.borderColor }]} mode="contained">
       <Card.Content style={styles.cardContent}>
         <View style={styles.rowTop}>
           <View style={styles.infoCol}>
@@ -55,7 +59,7 @@ export default function EvaluationCard({ evaluation }) {
               {treeCode} <Text style={styles.speciesText}>({treeSpecies})</Text>
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3 }}>
-              <Ionicons name="calendar-outline" size={13} color="#64748B" style={{ marginRight: 4 }} />
+              <Ionicons name="calendar-outline" size={13} color={colors.textSecondary} style={{ marginRight: 4 }} />
               <Text style={styles.dateText}>{formattedDate}</Text>
             </View>
           </View>
@@ -68,8 +72,8 @@ export default function EvaluationCard({ evaluation }) {
           </View>
         </View>
 
-        <View style={styles.recommendationBox}>
-          <Text style={styles.recommendationLabel}>Diagnóstico y Acción Técnica:</Text>
+        <View style={[styles.recommendationBox, { borderLeftColor: statusCfg.borderColor }]}>
+          <Text style={styles.recommendationLabel}>DIAGNÓSTICO Y ACCIÓN TÉCNICA:</Text>
           <Text style={styles.recommendationText} numberOfLines={2}>
             {statusCfg.rec}
           </Text>
@@ -78,8 +82,8 @@ export default function EvaluationCard({ evaluation }) {
         {notes ? (
           <View style={styles.commentsBox}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-              <Ionicons name="chatbox-ellipses-outline" size={13} color="#0284C7" style={{ marginRight: 4 }} />
-              <Text style={styles.commentsLabel}>Observaciones del Inspector:</Text>
+              <Ionicons name="chatbox-ellipses-outline" size={13} color={colors.primary} style={{ marginRight: 4 }} />
+              <Text style={styles.commentsLabel}>OBSERVACIONES DEL INSPECTOR:</Text>
             </View>
             <Text style={styles.commentsText} numberOfLines={2}>
               {notes}
@@ -95,13 +99,13 @@ const styles = StyleSheet.create({
   card: {
     marginVertical: 6,
     marginHorizontal: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    backgroundColor: colors.mainSurface,
+    borderRadius: borderRadius.card,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
+    borderColor: colors.borderLight,
+    shadowColor: colors.headerGreen,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.04,
     shadowRadius: 6,
     elevation: 2,
   },
@@ -118,69 +122,82 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   treeTitle: {
+    fontFamily: fonts.display,
     fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   speciesText: {
+    fontFamily: fonts.base,
     fontSize: 14,
-    fontWeight: '600',
-    color: '#475569',
+    fontWeight: '400',
+    color: colors.textSecondary,
   },
   dateText: {
+    fontFamily: fonts.base,
     fontSize: 12,
-    color: '#64748B',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   badgePill: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 12,
+    borderRadius: borderRadius.select,
     flexDirection: 'row',
     alignItems: 'center',
   },
   badgeScaleText: {
-    fontWeight: '800',
+    fontFamily: fonts.base,
+    fontWeight: '650',
     fontSize: 12,
   },
   recommendationBox: {
     marginTop: 12,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.panelSurface,
     padding: 12,
-    borderRadius: 14,
+    borderRadius: borderRadius.input,
     borderLeftWidth: 3,
-    borderLeftColor: '#16A34A',
+    borderLeftColor: colors.accentGreen,
   },
   recommendationLabel: {
+    fontFamily: fonts.base,
     fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
+    fontWeight: '650',
+    color: colors.textSecondary,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
     marginBottom: 2,
   },
   recommendationText: {
+    fontFamily: fonts.base,
     fontSize: 13,
-    color: '#334155',
-    fontWeight: '600',
+    color: colors.textPrimary,
+    fontWeight: '500',
     lineHeight: 18,
   },
   commentsBox: {
     marginTop: 8,
-    backgroundColor: '#F0F9FF',
+    backgroundColor: colors.secondaryButton,
     padding: 10,
-    borderRadius: 12,
+    borderRadius: borderRadius.input,
     borderLeftWidth: 3,
-    borderLeftColor: '#0284C7',
+    borderLeftColor: colors.primary,
   },
   commentsLabel: {
+    fontFamily: fonts.base,
     fontSize: 11,
-    fontWeight: '700',
-    color: '#0369A1',
+    fontWeight: '650',
+    color: colors.highlightText,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   commentsText: {
+    fontFamily: fonts.base,
     fontSize: 12,
-    color: '#334155',
+    color: colors.textPrimary,
     fontWeight: '500',
     fontStyle: 'italic',
     lineHeight: 16,
   },
 });
+

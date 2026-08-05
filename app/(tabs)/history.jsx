@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { Text, Searchbar, Chip } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { getTreesByCrew, getObservationsByTree } from '../../services/api';
 import EvaluationCard from '../../components/EvaluationCard';
+import { colors, fonts, spacing, borderRadius, layout } from '../../constants/theme';
 
 export default function HistoryScreen() {
+  const { width } = useWindowDimensions();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('todos');
   
@@ -78,90 +80,94 @@ export default function HistoryScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header Intro Banner */}
-      <View style={styles.headerBanner}>
-        <View style={styles.pillTag}>
-          <Ionicons name="time-outline" size={12} color="#176B52" style={{ marginRight: 4 }} />
-          <Text style={styles.pillTagText}>Seguimiento Quincenal del Alumno</Text>
-        </View>
-        <Text style={styles.headerTitle}>Mis Inspecciones y Expediente</Text>
-        <Text style={styles.headerSub}>
-          Consulta la valoración Hawksworth por tercios, coordenadas GPS y observaciones registradas en la API.
-        </Text>
-      </View>
-
       <ScrollView 
         showsVerticalScrollIndicator={false} 
-        contentContainerStyle={{ paddingBottom: 28 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#176B52']} />}
+        contentContainerStyle={{ paddingBottom: spacing.xxxl, alignItems: 'center' }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
       >
-        <Searchbar
-          placeholder="Buscar por código de árbol o notas..."
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchbar}
-          inputStyle={{ fontSize: 13 }}
-          icon={() => <Ionicons name="search-outline" size={18} color="#687A74" />}
-        />
-
-        {/* Species Filter Chips */}
-        <View style={styles.chipRow}>
-          <Chip 
-            selected={selectedFilter === 'todos'} 
-            onPress={() => setSelectedFilter('todos')}
-            style={[styles.chip, selectedFilter === 'todos' && styles.activeChip]}
-            textStyle={selectedFilter === 'todos' ? styles.activeChipText : styles.chipText}
-          >
-            Todas las Inspecciones ({observations.length})
-          </Chip>
-          <Chip 
-            selected={selectedFilter === 'mezquite'} 
-            onPress={() => setSelectedFilter('mezquite')}
-            style={[styles.chip, selectedFilter === 'mezquite' && styles.activeChip]}
-            textStyle={selectedFilter === 'mezquite' ? styles.activeChipText : styles.chipText}
-          >
-            Mezquites
-          </Chip>
-          <Chip 
-            selected={selectedFilter === 'huizache'} 
-            onPress={() => setSelectedFilter('huizache')}
-            style={[styles.chip, selectedFilter === 'huizache' && styles.activeChip]}
-            textStyle={selectedFilter === 'huizache' ? styles.activeChipText : styles.chipText}
-          >
-            Huizaches
-          </Chip>
-        </View>
-
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#176B52" />
-            <Text style={styles.loadingText}>Cargando expediente desde la API...</Text>
-          </View>
-        ) : filteredObservations.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Ionicons name="document-text-outline" size={36} color="#687A74" />
-            <Text style={styles.emptyTitle}>Sin Inspecciones Encontradas</Text>
-            <Text style={styles.emptySub}>No se encontraron expedientes con los filtros seleccionados en la base de datos.</Text>
-          </View>
-        ) : (
-          filteredObservations.map((evalItem, idx) => (
-            <View key={evalItem.id || evalItem._id || idx}>
-              <EvaluationCard evaluation={evalItem} />
-              
-              {evalItem.notes ? (
-                <View style={styles.doctorReviewBox}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                    <Ionicons name="chatbox-ellipses-outline" size={14} color="#176B52" style={{ marginRight: 6 }} />
-                    <Text style={styles.doctorReviewTitle}>Notas del Registro:</Text>
-                  </View>
-                  <Text style={styles.doctorReviewText}>
-                    "{evalItem.notes}"
-                  </Text>
-                </View>
-              ) : null}
+        <View style={[styles.mainWrapper, { maxWidth: layout.contentMaxWidthAuth }]}>
+          
+          {/* Header Intro Banner */}
+          <View style={styles.headerBanner}>
+            <View style={styles.pillTag}>
+              <Ionicons name="time-outline" size={12} color={colors.primary} style={{ marginRight: 4 }} />
+              <Text style={styles.pillTagText}>SEGUIMIENTO QUINCENAL DEL ALUMNO</Text>
             </View>
-          ))
-        )}
+            <Text style={styles.headerTitle}>Mis Inspecciones y Expediente</Text>
+            <Text style={styles.headerSub}>
+              Consulta la valoración Hawksworth por tercios, coordenadas GPS y observaciones registradas en la API.
+            </Text>
+          </View>
+
+          <Searchbar
+            placeholder="Buscar por código de árbol o notas..."
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={styles.searchbar}
+            inputStyle={{ fontSize: 13, fontFamily: fonts.base }}
+            icon={() => <Ionicons name="search-outline" size={18} color={colors.textSecondary} />}
+          />
+
+          {/* Species Filter Chips */}
+          <View style={styles.chipRow}>
+            <Chip 
+              selected={selectedFilter === 'todos'} 
+              onPress={() => setSelectedFilter('todos')}
+              style={[styles.chip, selectedFilter === 'todos' && styles.activeChip]}
+              textStyle={selectedFilter === 'todos' ? styles.activeChipText : styles.chipText}
+            >
+              Todas las Inspecciones ({observations.length})
+            </Chip>
+            <Chip 
+              selected={selectedFilter === 'mezquite'} 
+              onPress={() => setSelectedFilter('mezquite')}
+              style={[styles.chip, selectedFilter === 'mezquite' && styles.activeChip]}
+              textStyle={selectedFilter === 'mezquite' ? styles.activeChipText : styles.chipText}
+            >
+              Mezquites
+            </Chip>
+            <Chip 
+              selected={selectedFilter === 'huizache'} 
+              onPress={() => setSelectedFilter('huizache')}
+              style={[styles.chip, selectedFilter === 'huizache' && styles.activeChip]}
+              textStyle={selectedFilter === 'huizache' ? styles.activeChipText : styles.chipText}
+            >
+              Huizaches
+            </Chip>
+          </View>
+
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text style={styles.loadingText}>Cargando expediente desde la API...</Text>
+            </View>
+          ) : filteredObservations.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Ionicons name="document-text-outline" size={36} color={colors.textSecondary} />
+              <Text style={styles.emptyTitle}>Sin Inspecciones Encontradas</Text>
+              <Text style={styles.emptySub}>No se encontraron expedientes con los filtros seleccionados en la base de datos.</Text>
+            </View>
+          ) : (
+            filteredObservations.map((evalItem, idx) => (
+              <View key={evalItem.id || evalItem._id || idx} style={{ width: '100%' }}>
+                <EvaluationCard evaluation={evalItem} />
+                
+                {evalItem.notes ? (
+                  <View style={styles.doctorReviewBox}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
+                      <Ionicons name="chatbox-ellipses-outline" size={14} color={colors.primary} style={{ marginRight: 6 }} />
+                      <Text style={styles.doctorReviewTitle}>NOTAS DEL REGISTRO:</Text>
+                    </View>
+                    <Text style={styles.doctorReviewText}>
+                      "{evalItem.notes}"
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            ))
+          )}
+
+        </View>
       </ScrollView>
     </View>
   );
@@ -170,130 +176,152 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F8F5',
+    backgroundColor: colors.background,
+  },
+  mainWrapper: {
+    width: '100%',
+    alignSelf: 'center',
   },
   headerBanner: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 16,
+    backgroundColor: colors.mainSurface,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderColor: '#DCE7E1',
+    borderColor: colors.borderLight,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.accentGreen,
   },
   pillTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EDF6F1',
-    paddingHorizontal: 10,
+    backgroundColor: colors.secondaryButton,
+    paddingHorizontal: spacing.md,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: borderRadius.input,
     alignSelf: 'flex-start',
-    marginBottom: 6,
+    marginBottom: spacing.xs,
   },
   pillTagText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#176B52',
+    fontFamily: fonts.base,
+    fontSize: 10.5,
+    fontWeight: '650',
+    color: colors.primary,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#163029',
+    fontFamily: fonts.display,
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.headerGreen,
   },
   headerSub: {
-    fontSize: 12,
-    color: '#687A74',
+    fontFamily: fonts.base,
+    fontSize: 13,
+    color: colors.textSecondary,
     marginTop: 2,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   searchbar: {
-    marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 10,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
+    backgroundColor: colors.mainSurface,
+    borderRadius: borderRadius.input,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#DCE7E1',
+    borderColor: colors.borderLight,
   },
   chipRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-    gap: 8,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
   },
   chip: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: colors.mainSurface,
+    borderRadius: borderRadius.select,
     borderWidth: 1,
-    borderColor: '#DCE7E1',
+    borderColor: colors.borderLight,
   },
   activeChip: {
-    backgroundColor: '#EDF6F1',
-    borderColor: '#176B52',
+    backgroundColor: colors.secondaryButton,
+    borderColor: colors.primary,
   },
   chipText: {
-    color: '#687A74',
-    fontWeight: '600',
+    fontFamily: fonts.base,
+    color: colors.textSecondary,
+    fontWeight: '500',
     fontSize: 12,
   },
   activeChipText: {
-    color: '#176B52',
-    fontWeight: '800',
+    fontFamily: fonts.base,
+    color: colors.primary,
+    fontWeight: '650',
     fontSize: 12,
   },
   doctorReviewBox: {
-    backgroundColor: '#EDF6F1',
-    marginHorizontal: 16,
+    backgroundColor: colors.secondaryButton,
+    marginHorizontal: spacing.lg,
     marginTop: -4,
-    marginBottom: 12,
-    padding: 12,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+    borderBottomLeftRadius: borderRadius.card,
+    borderBottomRightRadius: borderRadius.card,
     borderWidth: 1,
-    borderColor: '#DCECE4',
+    borderColor: colors.borderLight,
     borderTopWidth: 0,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.primary,
   },
   doctorReviewTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#176B52',
+    fontFamily: fonts.base,
+    fontSize: 10.5,
+    fontWeight: '650',
+    color: colors.primary,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   doctorReviewText: {
-    fontSize: 12,
-    color: '#163029',
+    fontFamily: fonts.base,
+    fontSize: 12.5,
+    color: colors.textPrimary,
     fontStyle: 'italic',
-    lineHeight: 16,
+    lineHeight: 17,
   },
   loadingContainer: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: spacing.xxxl,
   },
   loadingText: {
-    color: '#687A74',
-    marginTop: 8,
+    fontFamily: fonts.base,
+    color: colors.textSecondary,
+    marginTop: spacing.sm,
     fontSize: 12,
   },
   emptyCard: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    padding: 24,
-    borderRadius: 20,
+    backgroundColor: colors.mainSurface,
+    marginHorizontal: spacing.lg,
+    padding: spacing.xxl,
+    borderRadius: borderRadius.card,
     borderWidth: 1,
-    borderColor: '#DCE7E1',
+    borderColor: colors.borderLight,
     alignItems: 'center',
   },
   emptyTitle: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#163029',
+    fontFamily: fonts.display,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.headerGreen,
     marginTop: 6,
   },
   emptySub: {
+    fontFamily: fonts.base,
     fontSize: 12,
-    color: '#687A74',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 4,
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });

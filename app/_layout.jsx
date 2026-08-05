@@ -1,34 +1,10 @@
 import { Stack } from 'expo-router';
-import { MD3LightTheme as DefaultTheme, PaperProvider } from 'react-native-paper';
+import { PaperProvider, ActivityIndicator } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
-import { AuthProvider } from '../context/AuthContext';
-
-// HenoTrack Design System Color Tokens from Prototipo Web Heno_Motita
-const theme = {
-  ...DefaultTheme,
-  roundness: 16,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: '#176B52', // Verde HenoTrack
-    primaryContainer: '#EDF6F1',
-    secondary: '#70AA46',
-    secondaryContainer: '#DCECE4',
-    error: '#C75B52',
-    errorContainer: '#FFF0EE',
-    warning: '#D99A28',
-    warningContainer: '#FFF5DF',
-    background: '#F4F8F5',
-    surface: '#FFFFFF',
-    surfaceVariant: '#EDF6F1',
-    onPrimary: '#FFFFFF',
-    onSurface: '#163029',
-  },
-};
-
-import { useAuth } from '../context/AuthContext';
 import { View, Text, StyleSheet } from 'react-native';
-import { ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import { paperTheme, colors, fonts } from '../constants/theme';
 
 function RootNavigator() {
   const { loading } = useAuth();
@@ -36,10 +12,10 @@ function RootNavigator() {
   if (loading) {
     return (
       <View style={styles.splashContainer}>
-        <MaterialCommunityIcons name="leaf" size={100} color="#FFFFFF" />
+        <MaterialCommunityIcons name="leaf" size={100} color={colors.mainSurface} />
         <Text style={styles.splashTitle}>HenoTrack</Text>
         <Text style={styles.splashSubtitle}>Motita Protector</Text>
-        <ActivityIndicator animating={true} color="#FFFFFF" size="large" style={{ marginTop: 40 }} />
+        <ActivityIndicator animating={true} color={colors.accentGreen} size="large" style={{ marginTop: 40 }} />
       </View>
     );
   }
@@ -48,15 +24,16 @@ function RootNavigator() {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#103F32', // Dark Emerald HenoTrack
+          backgroundColor: colors.headerGreen,
         },
-        headerTintColor: '#FFFFFF',
+        headerTintColor: colors.textOnGreen,
         headerTitleStyle: {
-          fontWeight: '800',
+          fontFamily: fonts.display,
+          fontWeight: '600',
           fontSize: 18,
         },
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: '#F4F8F5' },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -67,8 +44,8 @@ function RootNavigator() {
         options={{ 
           title: 'Nueva Inspección HenoTrack',
           headerBackTitle: 'Atrás',
-          headerStyle: { backgroundColor: '#103F32' }, 
-          headerTintColor: '#FFFFFF',
+          headerStyle: { backgroundColor: colors.headerGreen }, 
+          headerTintColor: colors.textOnGreen,
         }} 
       />
     </Stack>
@@ -78,7 +55,7 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <PaperProvider theme={theme}>
+      <PaperProvider theme={paperTheme}>
         <StatusBar style="light" />
         <RootNavigator />
       </PaperProvider>
@@ -89,23 +66,26 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   splashContainer: {
     flex: 1,
-    backgroundColor: '#103F32',
+    backgroundColor: colors.headerGreen,
     justifyContent: 'center',
     alignItems: 'center',
   },
   splashTitle: {
+    fontFamily: fonts.display,
     fontSize: 42,
-    fontWeight: '900',
-    color: '#FFFFFF',
+    fontWeight: '600',
+    color: colors.mainSurface,
     marginTop: 20,
-    letterSpacing: 1,
+    letterSpacing: -0.96, // -.06em equivalent
   },
   splashSubtitle: {
-    fontSize: 18,
-    color: '#70AA46',
+    fontFamily: fonts.base,
+    fontSize: 14,
+    color: colors.textOnGreen,
     fontWeight: '600',
     marginTop: 8,
     letterSpacing: 2,
     textTransform: 'uppercase',
   }
 });
+

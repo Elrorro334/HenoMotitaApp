@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator, useWindowDimensions } from 'react-native';
+import { Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { getTreesByCrew, getObservationsByTree } from '../../services/api';
 import EvaluationCard from '../../components/EvaluationCard';
 import { getRandomPhrase } from '../../services/timePhrases';
-
+import { colors, fonts, spacing, borderRadius, layout } from '../../constants/theme';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const theme = useTheme();
+  const { width } = useWindowDimensions();
+  const isWideScreen = width >= layout.breakpoint;
   const { user, crews, activeCrew, refreshCrews } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -86,7 +87,6 @@ export default function DashboardScreen() {
     }
   };
 
-
   const lastObsScore = recentEvaluations.length > 0 
     ? (recentEvaluations[0]?.hawksworth?.totalScore ?? 0) 
     : 0;
@@ -96,172 +96,175 @@ export default function DashboardScreen() {
       <ScrollView 
         contentContainerStyle={styles.scroll} 
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#176B52']} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
       >
-        {/* Student HenoTrack Hero Banner */}
-        <View style={styles.studentHero}>
-          <View style={styles.heroPill}>
-            <Ionicons name="sparkles-outline" size={12} color="#176B52" style={{ marginRight: 4 }} />
-            <Text style={styles.heroPillText}>Perfil Alumno · Monitoreo Ambiental UTTT</Text>
-          </View>
-
-          <Text style={styles.heroGreeting}>Hola, {studentName.split(' ')[0]}.</Text>
-          <Text style={styles.heroSub}>
-            {welcomePhrase || 'Tus registros estan al corriente. Consulta tus arboles, fotografias, observaciones y entregas quincenales.'}
-          </Text>
-
-
-          {/* Student Profile Card */}
-          <View style={styles.studentProfileBadge}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarText}>{studentInitials}</Text>
+        <View style={[styles.mainContainer, { maxWidth: layout.contentMaxWidthAuth }]}>
+          
+          {/* Student HenoTrack Hero Banner */}
+          <View style={styles.studentHero}>
+            <View style={styles.heroPill}>
+              <Ionicons name="sparkles-outline" size={12} color={colors.primary} style={{ marginRight: 4 }} />
+              <Text style={styles.heroPillText}>PERFIL ALUMNO · MONITOREO AMBIENTAL UTTT</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.badgeRoleLabel}>
-                {user?.role === 'STUDENT' ? 'Alumno Asignado' : user?.role || 'Inspector'}
-              </Text>
-              <Text style={styles.badgeName}>{studentName}</Text>
-              <Text style={styles.badgeCrew}>
-                {activeCrew?.name || activeCrew?.code || 'Cuadrilla Activa'} · {activeCrew?.zone || 'UTTT'}
-              </Text>
-            </View>
-          </View>
 
-          <View style={styles.heroActionsRow}>
-            <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push('/camera')}>
-              <Ionicons name="add-circle-outline" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
-              <Text style={styles.primaryBtnText}>Nueva Inspección</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.secondaryBtn} onPress={() => router.push('/(tabs)/history')}>
-              <Ionicons name="analytics-outline" size={18} color="#176B52" style={{ marginRight: 6 }} />
-              <Text style={styles.secondaryBtnText}>Mi Seguimiento</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Privacy Notice Banner */}
-        <View style={styles.privacyBanner}>
-          <Ionicons name="lock-closed" size={18} color="#176B52" style={{ marginRight: 10 }} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.privacyTitle}>Acceso Limitado por Perfil Alumno</Text>
-            <Text style={styles.privacySub}>
-              Desde esta vista solo puedes capturar inspecciones y consultar tus propios árboles asignados y reportes quincenales.
+            <Text style={styles.heroGreeting}>Hola, {studentName.split(' ')[0]}.</Text>
+            <Text style={styles.heroSub}>
+              {welcomePhrase || 'Tus registros están al corriente. Consulta tus árboles, fotografías, observaciones y entregas quincenales.'}
             </Text>
-          </View>
-        </View>
 
-        {/* Student KPIs Grid */}
-        <View style={styles.kpiGrid}>
-          <View style={styles.kpiCard}>
-            <View style={[styles.kpiIcon, { backgroundColor: '#EDF6F1' }]}>
-              <Ionicons name="checkmark-sharp" size={18} color="#176B52" />
-            </View>
-            <Text style={styles.kpiVal}>{trees.length}</Text>
-            <Text style={styles.kpiLabel}>Árboles Registrados</Text>
-          </View>
-
-          <View style={styles.kpiCard}>
-            <View style={[styles.kpiIcon, { backgroundColor: '#EAF2FB' }]}>
-              <Ionicons name="document-text-outline" size={18} color="#4E7AA8" />
-            </View>
-            <Text style={styles.kpiVal}>{recentEvaluations.length}</Text>
-            <Text style={styles.kpiLabel}>Informes Registrados</Text>
-          </View>
-
-          <View style={styles.kpiCard}>
-            <View style={[styles.kpiIcon, { backgroundColor: lastObsScore >= 4 ? '#FFF0EE' : '#FFF5DF' }]}>
-              <Ionicons 
-                name={lastObsScore >= 4 ? 'alert-circle' : 'warning-outline'} 
-                size={18} 
-                color={lastObsScore >= 4 ? '#C75B52' : '#D99A28'} 
-              />
-            </View>
-            <Text style={[styles.kpiVal, lastObsScore >= 4 && { color: '#C75B52' }]}>
-              {lastObsScore} / 6
-            </Text>
-            <Text style={styles.kpiLabel}>Última Valoración</Text>
-          </View>
-        </View>
-
-        {/* Assigned Principal Tree Card */}
-        {assignedTree && (
-          <View style={styles.assignedTreePanel}>
-            <View style={styles.panelHeader}>
-              <View>
-                <Text style={styles.panelKicker}>Asignación Principal</Text>
-                <Text style={styles.panelTitle}>Árbol de Seguimiento Quincenal</Text>
-              </View>
-              <View style={styles.priorityBadge}>
-                <Text style={styles.priorityBadgeText}>{assignedTree.status || 'ACTIVO'}</Text>
-              </View>
-            </View>
-
-            <View style={styles.assignedTreeCard}>
-              <View style={styles.treeIconCircle}>
-                <Ionicons name="leaf" size={24} color="#176B52" />
+            {/* Student Profile Card */}
+            <View style={styles.studentProfileBadge}>
+              <View style={styles.avatarCircle}>
+                <Text style={styles.avatarText}>{studentInitials}</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.treeCodeLabel}>Código de Árbol en API</Text>
-                <Text style={styles.treeCodeVal}>{assignedTree.code}</Text>
-                <Text style={styles.treeMetaSub}>
-                  {assignedTree.commonName || 'Especie'} {assignedTree.scientificName ? `· ${assignedTree.scientificName}` : ''}
+                <Text style={styles.badgeRoleLabel}>
+                  {user?.role === 'STUDENT' ? 'ALUMNO ASIGNADO' : user?.role || 'INSPECTOR'}
+                </Text>
+                <Text style={styles.badgeName}>{studentName}</Text>
+                <Text style={styles.badgeCrew}>
+                  {activeCrew?.name || activeCrew?.code || 'Cuadrilla Activa'} · {activeCrew?.zone || 'UTTT'}
                 </Text>
               </View>
             </View>
 
-            {recentEvaluations.length > 0 && (
-              <>
-                <Text style={styles.evolutionLabel}>Historial de Inspecciones Registradas en Servidor:</Text>
-                <View style={styles.evolutionGrid}>
-                  {recentEvaluations.slice(0, 3).map((obs, idx) => {
-                    const score = obs?.hawksworth?.totalScore ?? 0;
-                    const dateStr = obs?.observationDate ? new Date(obs.observationDate).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }) : `Visita ${idx + 1}`;
-                    return (
-                      <View key={obs.id || obs._id || idx} style={styles.evoCol}>
-                        <Text style={styles.evoDate}>{dateStr}</Text>
-                        <Text style={styles.evoScore}>{score} / 6</Text>
-                        <View style={[styles.evoBar, { height: Math.max(16, score * 9), backgroundColor: score >= 4 ? '#C75B52' : score >= 2 ? '#D99A28' : '#176B52' }]} />
-                      </View>
-                    );
-                  })}
+            <View style={styles.heroActionsRow}>
+              <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push('/camera')}>
+                <Ionicons name="add-circle-outline" size={18} color={colors.mainSurface} style={{ marginRight: 6 }} />
+                <Text style={styles.primaryBtnText}>Nueva Inspección</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.secondaryBtn} onPress={() => router.push('/(tabs)/history')}>
+                <Ionicons name="analytics-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+                <Text style={styles.secondaryBtnText}>Mi Seguimiento</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Privacy Notice Banner */}
+          <View style={styles.privacyBanner}>
+            <Ionicons name="lock-closed" size={18} color={colors.primary} style={{ marginRight: 10 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.privacyTitle}>Acceso Limitado por Perfil Alumno</Text>
+              <Text style={styles.privacySub}>
+                Desde esta vista solo puedes capturar inspecciones y consultar tus propios árboles asignados y reportes quincenales.
+              </Text>
+            </View>
+          </View>
+
+          {/* Student KPIs Grid with 3px Left Border Accent */}
+          <View style={[styles.kpiGrid, isWideScreen && styles.wideKpiGrid]}>
+            <View style={[styles.kpiCard, { borderLeftWidth: 3, borderLeftColor: colors.accentGreen }]}>
+              <View style={[styles.kpiIcon, { backgroundColor: colors.secondaryButton }]}>
+                <Ionicons name="checkmark-sharp" size={18} color={colors.primary} />
+              </View>
+              <Text style={styles.kpiVal}>{trees.length}</Text>
+              <Text style={styles.kpiLabel}>ÁRBOLES REGISTRADOS</Text>
+            </View>
+
+            <View style={[styles.kpiCard, { borderLeftWidth: 3, borderLeftColor: colors.focusGreen }]}>
+              <View style={[styles.kpiIcon, { backgroundColor: colors.panelSurface }]}>
+                <Ionicons name="document-text-outline" size={18} color={colors.primary} />
+              </View>
+              <Text style={styles.kpiVal}>{recentEvaluations.length}</Text>
+              <Text style={styles.kpiLabel}>INFORMES REGISTRADOS</Text>
+            </View>
+
+            <View style={[styles.kpiCard, { borderLeftWidth: 3, borderLeftColor: lastObsScore >= 4 ? colors.errorBorder : colors.warningText }]}>
+              <View style={[styles.kpiIcon, { backgroundColor: lastObsScore >= 4 ? colors.errorBg : colors.warningBg }]}>
+                <Ionicons 
+                  name={lastObsScore >= 4 ? 'alert-circle' : 'warning-outline'} 
+                  size={18} 
+                  color={lastObsScore >= 4 ? colors.errorBorder : colors.warningText} 
+                />
+              </View>
+              <Text style={[styles.kpiVal, lastObsScore >= 4 && { color: colors.errorText }]}>
+                {lastObsScore} / 6
+              </Text>
+              <Text style={styles.kpiLabel}>ÚLTIMA VALORACIÓN</Text>
+            </View>
+          </View>
+
+          {/* Assigned Principal Tree Card with 3px Accent */}
+          {assignedTree && (
+            <View style={styles.assignedTreePanel}>
+              <View style={styles.panelHeader}>
+                <View>
+                  <Text style={styles.panelKicker}>ASIGNACIÓN PRINCIPAL</Text>
+                  <Text style={styles.panelTitle}>Árbol de Seguimiento Quincenal</Text>
                 </View>
-              </>
-            )}
-          </View>
-        )}
+                <View style={styles.priorityBadge}>
+                  <Text style={styles.priorityBadgeText}>{assignedTree.status || 'ACTIVO'}</Text>
+                </View>
+              </View>
 
-        {/* Recent Inspections Header */}
-        <View style={styles.sectionHeader}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons name="time-outline" size={20} color="#176B52" style={{ marginRight: 6 }} />
-            <Text style={styles.sectionTitle}>Tus Últimas Inspecciones en Servidor</Text>
+              <View style={styles.assignedTreeCard}>
+                <View style={styles.treeIconCircle}>
+                  <Ionicons name="leaf" size={24} color={colors.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.treeCodeLabel}>CÓDIGO DE ÁRBOOL EN API</Text>
+                  <Text style={styles.treeCodeVal}>{assignedTree.code}</Text>
+                  <Text style={styles.treeMetaSub}>
+                    {assignedTree.commonName || 'Especie'} {assignedTree.scientificName ? `· ${assignedTree.scientificName}` : ''}
+                  </Text>
+                </View>
+              </View>
+
+              {recentEvaluations.length > 0 && (
+                <>
+                  <Text style={styles.evolutionLabel}>HISTORIAL DE INSPECCIONES REGISTRADAS EN SERVIDOR:</Text>
+                  <View style={styles.evolutionGrid}>
+                    {recentEvaluations.slice(0, 3).map((obs, idx) => {
+                      const score = obs?.hawksworth?.totalScore ?? 0;
+                      const dateStr = obs?.observationDate ? new Date(obs.observationDate).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }) : `Visita ${idx + 1}`;
+                      const barColor = score >= 4 ? colors.errorBorder : score >= 2 ? colors.warningText : colors.primary;
+                      return (
+                        <View key={obs.id || obs._id || idx} style={styles.evoCol}>
+                          <Text style={styles.evoDate}>{dateStr}</Text>
+                          <Text style={styles.evoScore}>{score} / 6</Text>
+                          <View style={[styles.evoBar, { height: Math.max(16, score * 9), backgroundColor: barColor }]} />
+                        </View>
+                      );
+                    })}
+                  </View>
+                </>
+              )}
+            </View>
+          )}
+
+          {/* Recent Inspections Header */}
+          <View style={styles.sectionHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="time-outline" size={20} color={colors.primary} style={{ marginRight: 6 }} />
+              <Text style={styles.sectionTitle}>Tus Últimas Inspecciones en Servidor</Text>
+            </View>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/history')}>
+              <Text style={styles.viewAllText}>Ver Historial →</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/history')}>
-            <Text style={styles.viewAllText}>Ver Historial →</Text>
-          </TouchableOpacity>
+
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text style={styles.loadingText}>Cargando información...</Text>
+            </View>
+          ) : recentEvaluations.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Ionicons name="leaf-outline" size={40} color={colors.textSecondary} style={{ marginBottom: 8 }} />
+              <Text style={styles.emptyTitle}>Sin Inspecciones Registradas</Text>
+              <Text style={styles.emptySub}>
+                Aún no has registrado capturas de campo en la plataforma. Presiona "Nueva Inspección" para comenzar.
+              </Text>
+            </View>
+          ) : (
+            recentEvaluations.map((evalItem, index) => (
+              <EvaluationCard key={evalItem.id || evalItem._id || index} evaluation={evalItem} />
+            ))
+          )}
+
+          <View style={{ height: 32 }} /> 
         </View>
-
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#176B52" />
-            <Text style={styles.loadingText}>Cargando información...</Text>
-          </View>
-        ) : recentEvaluations.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Ionicons name="leaf-outline" size={40} color="#687A74" style={{ marginBottom: 8 }} />
-            <Text style={styles.emptyTitle}>Sin Inspecciones Registradas</Text>
-            <Text style={styles.emptySub}>
-              Aún no has registrado capturas de campo en la plataforma. Presiona "Nueva Inspección" para comenzar.
-            </Text>
-          </View>
-        ) : (
-          recentEvaluations.map((evalItem, index) => (
-            <EvaluationCard key={evalItem.id || evalItem._id || index} evaluation={evalItem} />
-          ))
-        )}
-
-        <View style={{ height: 32 }} /> 
       </ScrollView>
     </View>
   );
@@ -270,278 +273,326 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F8F5',
+    backgroundColor: colors.background,
   },
   scroll: {
-    paddingBottom: 24,
+    paddingBottom: spacing.xxl,
+    alignItems: 'center',
+  },
+  mainContainer: {
+    width: '100%',
+    alignSelf: 'center',
   },
   studentHero: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 24,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    backgroundColor: colors.mainSurface,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.xxl,
+    borderBottomLeftRadius: borderRadius.card,
+    borderBottomRightRadius: borderRadius.card,
     borderWidth: 1,
-    borderColor: '#DCE7E1',
-    marginBottom: 16,
+    borderColor: colors.borderLight,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.accentGreen,
+    marginBottom: spacing.lg,
   },
   heroPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EDF6F1',
-    paddingHorizontal: 10,
+    backgroundColor: colors.secondaryButton,
+    paddingHorizontal: spacing.md,
     paddingVertical: 4,
-    borderRadius: 10,
+    borderRadius: borderRadius.input,
     alignSelf: 'flex-start',
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   heroPillText: {
+    fontFamily: fonts.base,
     fontSize: 11,
-    fontWeight: '800',
-    color: '#176B52',
+    fontWeight: '650',
+    color: colors.primary,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
   },
   heroGreeting: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#163029',
+    fontFamily: fonts.display,
+    fontSize: 26,
+    fontWeight: '600',
+    color: colors.headerGreen,
   },
   heroSub: {
-    fontSize: 13,
-    color: '#687A74',
+    fontFamily: fonts.base,
+    fontSize: 14,
+    color: colors.textSecondary,
     marginTop: 4,
-    lineHeight: 18,
+    lineHeight: 20,
     fontWeight: '500',
   },
   studentProfileBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EDF6F1',
-    padding: 12,
-    borderRadius: 18,
-    marginTop: 14,
+    backgroundColor: colors.panelSurface,
+    padding: spacing.md,
+    borderRadius: borderRadius.card,
+    marginTop: spacing.md,
     borderWidth: 1,
-    borderColor: '#DCECE4',
+    borderColor: colors.borderLight,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.primary,
   },
   avatarCircle: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#176B52',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   avatarText: {
-    color: '#FFFFFF',
-    fontWeight: '900',
+    color: colors.mainSurface,
+    fontFamily: fonts.display,
+    fontWeight: '600',
     fontSize: 16,
   },
   badgeRoleLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#176B52',
+    fontFamily: fonts.base,
+    fontSize: 10.5,
+    fontWeight: '650',
+    color: colors.primary,
     textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   badgeName: {
+    fontFamily: fonts.display,
     fontSize: 15,
-    fontWeight: '900',
-    color: '#163029',
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   badgeCrew: {
-    fontSize: 11,
-    color: '#687A74',
-    fontWeight: '600',
+    fontFamily: fonts.base,
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: '500',
     marginTop: 1,
   },
   heroActionsRow: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 16,
+    gap: spacing.md,
+    marginTop: spacing.lg,
   },
   primaryBtn: {
     flex: 1,
-    backgroundColor: '#176B52',
-    paddingVertical: 12,
-    borderRadius: 14,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.button,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryBtnText: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 13,
+    fontFamily: fonts.base,
+    color: colors.mainSurface,
+    fontWeight: '650',
+    fontSize: 14,
   },
   secondaryBtn: {
     flex: 1,
-    backgroundColor: '#EDF6F1',
+    backgroundColor: colors.secondaryButton,
     borderWidth: 1,
-    borderColor: '#176B52',
-    paddingVertical: 12,
-    borderRadius: 14,
+    borderColor: colors.borderLight,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.button,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondaryBtnText: {
-    color: '#176B52',
-    fontWeight: '800',
-    fontSize: 13,
+    fontFamily: fonts.base,
+    color: colors.primary,
+    fontWeight: '650',
+    fontSize: 14,
   },
   privacyBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EDF6F1',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 14,
-    borderRadius: 16,
+    backgroundColor: colors.panelSurface,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    borderRadius: borderRadius.card,
     borderWidth: 1,
-    borderColor: '#DCECE4',
+    borderColor: colors.borderLight,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.primary,
   },
   privacyTitle: {
+    fontFamily: fonts.display,
     fontSize: 13,
-    fontWeight: '800',
-    color: '#176B52',
+    fontWeight: '600',
+    color: colors.headerGreen,
   },
   privacySub: {
-    fontSize: 11,
-    color: '#687A74',
+    fontFamily: fonts.base,
+    fontSize: 12,
+    color: colors.textSecondary,
     marginTop: 2,
-    lineHeight: 15,
+    lineHeight: 16,
   },
   kpiGrid: {
     flexDirection: 'row',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    gap: 10,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    gap: spacing.md,
+  },
+  wideKpiGrid: {
+    gap: spacing.lg,
   },
   kpiCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 12,
+    backgroundColor: colors.mainSurface,
+    borderRadius: borderRadius.card,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: '#DCE7E1',
+    borderColor: colors.borderLight,
     alignItems: 'center',
   },
   kpiIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justify.Content: 'center',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: spacing.xs,
   },
   kpiVal: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#163029',
+    fontFamily: fonts.display,
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   kpiLabel: {
+    fontFamily: fonts.base,
     fontSize: 10,
-    fontWeight: '700',
-    color: '#687A74',
+    fontWeight: '650',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 2,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   assignedTreePanel: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    borderRadius: 20,
-    padding: 16,
+    backgroundColor: colors.mainSurface,
+    marginHorizontal: spacing.lg,
+    borderRadius: borderRadius.card,
+    padding: spacing.lg,
     borderWidth: 1,
-    borderColor: '#DCE7E1',
-    marginBottom: 16,
+    borderColor: colors.borderLight,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.accentGreen,
+    marginBottom: spacing.lg,
   },
   panelHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   panelKicker: {
+    fontFamily: fonts.base,
     fontSize: 11,
-    fontWeight: '800',
-    color: '#176B52',
+    fontWeight: '650',
+    color: colors.primary,
     textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   panelTitle: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#163029',
+    fontFamily: fonts.display,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.headerGreen,
   },
   priorityBadge: {
-    backgroundColor: '#EDF6F1',
-    paddingHorizontal: 8,
+    backgroundColor: colors.secondaryButton,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: borderRadius.input,
   },
   priorityBadgeText: {
+    fontFamily: fonts.base,
     fontSize: 10,
-    fontWeight: '900',
-    color: '#176B52',
+    fontWeight: '650',
+    color: colors.primary,
   },
   assignedTreeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F4F8F5',
-    padding: 12,
-    borderRadius: 14,
-    marginBottom: 12,
+    backgroundColor: colors.panelSurface,
+    padding: spacing.md,
+    borderRadius: borderRadius.input,
+    marginBottom: spacing.md,
   },
   treeIconCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#EDF6F1',
+    backgroundColor: colors.secondaryButton,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   treeCodeLabel: {
+    fontFamily: fonts.base,
     fontSize: 10,
-    fontWeight: '700',
-    color: '#687A74',
+    fontWeight: '650',
+    color: colors.textSecondary,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   treeCodeVal: {
+    fontFamily: fonts.display,
     fontSize: 16,
-    fontWeight: '900',
-    color: '#163029',
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   treeMetaSub: {
+    fontFamily: fonts.base,
     fontSize: 12,
-    color: '#687A74',
+    color: colors.textSecondary,
   },
   evolutionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#687A74',
-    marginBottom: 8,
+    fontFamily: fonts.base,
+    fontSize: 11,
+    fontWeight: '650',
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   evolutionGrid: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'flex-end',
-    backgroundColor: '#EDF6F1',
-    padding: 14,
-    borderRadius: 14,
+    backgroundColor: colors.panelSurface,
+    padding: spacing.md,
+    borderRadius: borderRadius.input,
     height: 90,
   },
   evoCol: {
     alignItems: 'center',
   },
   evoDate: {
+    fontFamily: fonts.base,
     fontSize: 10,
-    fontWeight: '700',
-    color: '#687A74',
+    fontWeight: '600',
+    color: colors.textSecondary,
     marginBottom: 2,
   },
   evoScore: {
+    fontFamily: fonts.base,
     fontSize: 11,
-    fontWeight: '900',
-    color: '#163029',
+    fontWeight: '650',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   evoBar: {
@@ -552,47 +603,52 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginHorizontal: 20,
-    marginBottom: 10,
+    marginHorizontal: spacing.xl,
+    marginBottom: spacing.sm,
   },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#163029',
+    fontFamily: fonts.display,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.headerGreen,
   },
   viewAllText: {
+    fontFamily: fonts.base,
     fontSize: 12,
-    fontWeight: '800',
-    color: '#176B52',
+    fontWeight: '650',
+    color: colors.primary,
   },
   loadingContainer: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: spacing.xxxl,
   },
   loadingText: {
-    color: '#687A74',
-    marginTop: 8,
+    fontFamily: fonts.base,
+    color: colors.textSecondary,
+    marginTop: spacing.sm,
     fontSize: 12,
   },
   emptyCard: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    padding: 24,
-    borderRadius: 20,
+    backgroundColor: colors.mainSurface,
+    marginHorizontal: spacing.lg,
+    padding: spacing.xxl,
+    borderRadius: borderRadius.card,
     borderWidth: 1,
-    borderColor: '#DCE7E1',
+    borderColor: colors.borderLight,
     alignItems: 'center',
   },
   emptyTitle: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#163029',
+    fontFamily: fonts.display,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.headerGreen,
   },
   emptySub: {
+    fontFamily: fonts.base,
     fontSize: 12,
-    color: '#687A74',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 4,
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });

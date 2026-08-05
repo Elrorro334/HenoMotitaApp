@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, Image, Linking, TouchableOpacity, Dimensions } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, Image, Linking, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { TextInput, Button, Text, Card, Chip, ProgressBar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { activateStudent } from '../services/api';
 import { getRandomPhrase } from '../services/timePhrases';
-
-const { width } = Dimensions.get('window');
+import { colors, fonts, spacing, borderRadius, layout, shadows } from '../constants/theme';
 
 export default function LoginScreen() {
+  const { width, height } = useWindowDimensions();
+  const isDesktop = width >= layout.breakpoint;
+
   const [showInfo, setShowInfo] = useState(true);
   const [slideIndex, setSlideIndex] = useState(0); // 0 | 1 | 2
   const [mode, setMode] = useState('login'); // 'login' | 'activate'
@@ -24,7 +26,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
-
 
   // Activation fields
   const [activationCode, setActivationCode] = useState('');
@@ -45,7 +46,7 @@ export default function LoginScreen() {
       router.replace('/(tabs)/dashboard');
     } catch (error) {
       console.error('HenoTrack login error:', error);
-      setLoginError(error.message || 'Contrasena incorrecta o cuenta no registrada.');
+      setLoginError(error.message || 'Contraseña incorrecta o cuenta no registrada.');
     } finally {
       setLoginLoading(false);
     }
@@ -69,11 +70,11 @@ export default function LoginScreen() {
 
       Alert.alert(
         'Cuenta Activada',
-        'Tu cuenta ha sido registrada exitosamente. Ya puedes iniciar sesion.',
+        'Tu cuenta ha sido registrada exitosamente. Ya puedes iniciar sesión.',
         [{ text: 'Entendido', onPress: () => setMode('login') }]
       );
     } catch (error) {
-      Alert.alert('Error de Activación', error.message || 'Codigo de activacion invalido o ya utilizado.');
+      Alert.alert('Error de Activación', error.message || 'Código de activación inválido o ya utilizado.');
     } finally {
       setActivateLoading(false);
     }
@@ -99,12 +100,15 @@ export default function LoginScreen() {
     }
   };
 
+  // -------------------------------------------------------------
+  // ONBOARDING INFO VIEW
+  // -------------------------------------------------------------
   if (showInfo) {
     return (
       <View style={styles.infoWrapper}>
-        {/* Top Gamification Progress Indicator */}
+        {/* Top Progress Indicator */}
         <View style={styles.progressBarWrapper}>
-          <ProgressBar progress={(slideIndex + 1) / 3} color="#176B52" style={styles.progressBar} />
+          <ProgressBar progress={(slideIndex + 1) / 3} color={colors.primary} style={styles.progressBar} />
           <View style={styles.slideCounterRow}>
             <Text style={styles.slideCounterText}>Paso {slideIndex + 1} de 3</Text>
             <View style={styles.dotsRow}>
@@ -122,18 +126,18 @@ export default function LoginScreen() {
         </View>
 
         <ScrollView contentContainerStyle={styles.infoScrollContent} showsVerticalScrollIndicator={false}>
-          <View style={styles.infoContainer}>
+          <View style={[styles.infoContainer, { maxWidth: layout.contentMaxWidthUnauth }]}>
             
             {/* Slide 0: What is it? */}
             {slideIndex === 0 && (
               <View style={styles.slideContent}>
                 <View style={styles.infoHeader}>
                   <View style={styles.infoIconCircle}>
-                    <MaterialCommunityIcons name="dna" size={40} color="#FFFFFF" />
+                    <MaterialCommunityIcons name="dna" size={38} color={colors.mainSurface} />
                   </View>
-                  <Text variant="headlineMedium" style={styles.infoTitle}>Conoce al Heno Motita</Text>
-                  <Text variant="bodyMedium" style={styles.infoSubtitle}>
-                    Identificacion y características biológicas básicas
+                  <Text style={styles.infoTitle}>Conoce al Heno Motita</Text>
+                  <Text style={styles.infoSubtitle}>
+                    Identificación y características biológicas básicas
                   </Text>
                 </View>
 
@@ -142,7 +146,7 @@ export default function LoginScreen() {
                     Tillandsia recurvata
                   </Chip>
                   <Chip style={styles.infoChip} textStyle={styles.infoChipText}>
-                    Planta epifita aerea
+                    Planta epífita aérea
                   </Chip>
                 </View>
 
@@ -154,9 +158,9 @@ export default function LoginScreen() {
 
                 <Card style={styles.infoCard}>
                   <Card.Content>
-                    <Text style={styles.cardHeader}>Que es?</Text>
+                    <Text style={styles.cardHeader}>¿Qué es?</Text>
                     <Text style={styles.cardBody}>
-                      Es una pequeña planta grisácea que vive sobre las ramas de los árboles y cables públicos. Aunque no es un parásito y no absorbe la savia del árbol, se comporta como una plaga peligrosa cuando se multiplica sin control.
+                      Es una pequeña planta grisácea que vive sobre las ramas de los árboles y cables públicos. Aunque no es un parásito directo y no absorbe la savia del árbol, se comporta como una plaga peligrosa cuando se multiplica sin control.
                     </Text>
                   </Card.Content>
                 </Card>
@@ -167,12 +171,12 @@ export default function LoginScreen() {
             {slideIndex === 1 && (
               <View style={styles.slideContent}>
                 <View style={styles.infoHeader}>
-                  <View style={[styles.infoIconCircle, { backgroundColor: '#C75B52' }]}>
-                    <Ionicons name="alert-circle" size={40} color="#FFFFFF" />
+                  <View style={[styles.infoIconCircle, { backgroundColor: colors.errorBorder }]}>
+                    <Ionicons name="alert-circle" size={38} color={colors.mainSurface} />
                   </View>
-                  <Text variant="headlineMedium" style={[styles.infoTitle, { color: '#C75B52' }]}>El Peligro Latente</Text>
-                  <Text variant="bodyMedium" style={styles.infoSubtitle}>
-                    Por que representa una amenaza letal para los arboles
+                  <Text style={[styles.infoTitle, { color: colors.errorBorder }]}>El Peligro Latente</Text>
+                  <Text style={styles.infoSubtitle}>
+                    Por qué representa una amenaza letal para los árboles
                   </Text>
                 </View>
 
@@ -184,10 +188,10 @@ export default function LoginScreen() {
 
                 <Card style={[styles.infoCard, styles.dangerCard]}>
                   <Card.Content>
-                    <Text style={[styles.cardHeader, { color: '#C75B52' }]}>Por que es un peligro?</Text>
+                    <Text style={[styles.cardHeader, { color: colors.errorText }]}>¿Por qué es un peligro?</Text>
                     
                     <View style={styles.bulletRow}>
-                      <Ionicons name="close-circle" size={20} color="#C75B52" style={styles.bulletIcon} />
+                      <Ionicons name="close-circle" size={20} color={colors.errorBorder} style={styles.bulletIcon} />
                       <View style={styles.bulletTextWrapper}>
                         <Text style={styles.bulletTitle}>Bloquea el sol</Text>
                         <Text style={styles.cardBody}>Cubre por completo las hojas, impidiendo la fotosíntesis del árbol.</Text>
@@ -195,7 +199,7 @@ export default function LoginScreen() {
                     </View>
 
                     <View style={styles.bulletRow}>
-                      <Ionicons name="close-circle" size={20} color="#C75B52" style={styles.bulletIcon} />
+                      <Ionicons name="close-circle" size={20} color={colors.errorBorder} style={styles.bulletIcon} />
                       <View style={styles.bulletTextWrapper}>
                         <Text style={styles.bulletTitle}>Seca las ramas</Text>
                         <Text style={styles.cardBody}>Al no recibir luz ni aire, las ramas se debilitan, se secan y mueren.</Text>
@@ -203,7 +207,7 @@ export default function LoginScreen() {
                     </View>
 
                     <View style={styles.bulletRow}>
-                      <Ionicons name="close-circle" size={20} color="#C75B52" style={styles.bulletIcon} />
+                      <Ionicons name="close-circle" size={20} color={colors.errorBorder} style={styles.bulletIcon} />
                       <View style={styles.bulletTextWrapper}>
                         <Text style={styles.bulletTitle}>Se contagia rápido</Text>
                         <Text style={styles.cardBody}>El viento transporta sus semillas flotantes con mucha facilidad hacia otros árboles sanos.</Text>
@@ -218,21 +222,21 @@ export default function LoginScreen() {
             {slideIndex === 2 && (
               <View style={styles.slideContent}>
                 <View style={styles.infoHeader}>
-                  <View style={[styles.infoIconCircle, { backgroundColor: '#176B52' }]}>
-                    <Ionicons name="checkmark-circle" size={40} color="#FFFFFF" />
+                  <View style={[styles.infoIconCircle, { backgroundColor: colors.primary }]}>
+                    <Ionicons name="checkmark-circle" size={38} color={colors.mainSurface} />
                   </View>
-                  <Text variant="headlineMedium" style={[styles.infoTitle, { color: '#176B52' }]}>Solucion Activa</Text>
-                  <Text variant="bodyMedium" style={styles.infoSubtitle}>
-                    Metodos eficientes para erradicar y prevenir la plaga
+                  <Text style={[styles.infoTitle, { color: colors.headerGreen }]}>Solución Activa</Text>
+                  <Text style={styles.infoSubtitle}>
+                    Métodos eficientes para erradicar y prevenir la plaga
                   </Text>
                 </View>
 
                 <Card style={[styles.infoCard, styles.solutionCard]}>
                   <Card.Content>
-                    <Text style={[styles.cardHeader, { color: '#176B52' }]}>Como solucionarlo?</Text>
+                    <Text style={[styles.cardHeader, { color: colors.primary }]}>¿Cómo solucionarlo?</Text>
 
                     <View style={styles.bulletRow}>
-                      <Ionicons name="checkmark-circle" size={20} color="#176B52" style={styles.bulletIcon} />
+                      <Ionicons name="checkmark-circle" size={20} color={colors.primary} style={styles.bulletIcon} />
                       <View style={styles.bulletTextWrapper}>
                         <Text style={styles.bulletTitle}>Limpieza manual</Text>
                         <Text style={styles.cardBody}>Despréndela con cuidado de las ramas usando tus manos o varas largas.</Text>
@@ -240,7 +244,7 @@ export default function LoginScreen() {
                     </View>
 
                     <View style={styles.bulletRow}>
-                      <Ionicons name="checkmark-circle" size={20} color="#176B52" style={styles.bulletIcon} />
+                      <Ionicons name="checkmark-circle" size={20} color={colors.primary} style={styles.bulletIcon} />
                       <View style={styles.bulletTextWrapper}>
                         <Text style={styles.bulletTitle}>Desecho seguro</Text>
                         <Text style={styles.cardBody}>Guarda los restos en bolsas cerradas para que el viento no disperse sus semillas.</Text>
@@ -248,7 +252,7 @@ export default function LoginScreen() {
                     </View>
 
                     <View style={styles.bulletRow}>
-                      <Ionicons name="checkmark-circle" size={20} color="#176B52" style={styles.bulletIcon} />
+                      <Ionicons name="checkmark-circle" size={20} color={colors.primary} style={styles.bulletIcon} />
                       <View style={styles.bulletTextWrapper}>
                         <Text style={styles.bulletTitle}>Remedio casero</Text>
                         <Text style={styles.cardBody}>Fumiga la zona limpia con agua y bicarbonato de sodio para evitar que regrese.</Text>
@@ -259,8 +263,8 @@ export default function LoginScreen() {
 
                 {/* Saber Más Link */}
                 <TouchableOpacity onPress={openMoreInfo} style={styles.linkContainer}>
-                  <Ionicons name="globe-outline" size={20} color="#176B52" />
-                  <Text style={styles.linkText}>Saber mas en henomotita.mx</Text>
+                  <Ionicons name="globe-outline" size={20} color={colors.primary} />
+                  <Text style={styles.linkText}>Saber más en henomotita.mx</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -274,11 +278,11 @@ export default function LoginScreen() {
             <Button
               mode="outlined"
               onPress={prevSlide}
-              textColor="#176B52"
+              textColor={colors.primary}
               style={styles.navButton}
-              icon={() => <Ionicons name="arrow-back" size={18} color="#176B52" />}
+              icon={() => <Ionicons name="arrow-back" size={18} color={colors.primary} />}
             >
-              Atras
+              Atrás
             </Button>
           ) : (
             <View style={{ flex: 1 }} />
@@ -287,11 +291,11 @@ export default function LoginScreen() {
           <Button
             mode="contained"
             onPress={nextSlide}
-            buttonColor="#176B52"
-            textColor="#FFFFFF"
+            buttonColor={colors.primary}
+            textColor={colors.mainSurface}
             style={styles.navButton}
             contentStyle={{ flexDirection: 'row-reverse' }}
-            icon={() => <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />}
+            icon={() => <Ionicons name="arrow-forward" size={18} color={colors.mainSurface} />}
           >
             {slideIndex === 2 ? 'Comenzar' : 'Siguiente'}
           </Button>
@@ -300,197 +304,226 @@ export default function LoginScreen() {
     );
   }
 
+  // -------------------------------------------------------------
+  // AUTHENTICATION LOGIN / ACTIVATION VIEW
+  // Responsive: Desktop 2-column (>=720px), Mobile 1-column (<720px, panel >=38vh)
+  // -------------------------------------------------------------
   return (
     <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: '#F4F8F5' }]} 
+      style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Modern Elegant Header */}
-        <View style={styles.headerBlock}>
-          <View style={styles.iconCircle}>
-            <Ionicons name="leaf" size={40} color="#FFFFFF" />
-          </View>
-          <Text style={styles.institutionCode}>UTTT • VALLE DEL MEZQUITAL</Text>
-          <Text style={styles.title}>HenoTrack</Text>
-          <Text style={styles.subtitle}>Monitoreo y Conservacion Ambiental</Text>
-        </View>
+        <View style={[styles.mainWrapper, isDesktop && styles.desktopMainWrapper]}>
 
-        {/* Custom Segmented Pill Tab Toggle */}
-        <View style={styles.segmentedToggleContainer}>
-          <TouchableOpacity 
-            style={[styles.segmentedTab, mode === 'login' && styles.segmentedTabActive]} 
-            onPress={() => setMode('login')}
-          >
-            <Text style={[styles.segmentedTabText, mode === 'login' && styles.segmentedTabTextActive]}>
-              Iniciar Sesion
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.segmentedTab, mode === 'activate' && styles.segmentedTabActive]} 
-            onPress={() => setMode('activate')}
-          >
-            <Text style={[styles.segmentedTabText, mode === 'activate' && styles.segmentedTabTextActive]}>
-              Activar Cuenta
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Premium Form Card */}
-        <View style={styles.cardForm}>
-          {preLoginPhrase ? (
-            <View style={styles.phraseBubble}>
-              <Ionicons name="sunny-outline" size={16} color="#176B52" style={{ marginRight: 6 }} />
-              <Text style={styles.phraseText}>{preLoginPhrase}</Text>
+          {/* Brand Header Panel */}
+          <View style={[
+            styles.headerBlock, 
+            isDesktop ? styles.desktopHeaderBlock : { minHeight: Math.max(height * 0.38, 260) }
+          ]}>
+            <View style={styles.iconCircle}>
+              <Ionicons name="leaf" size={44} color={colors.textOnGreen} />
             </View>
-          ) : null}
+            <Text style={styles.institutionCode}>UTTT • VALLE DEL MEZQUITAL</Text>
+            <Text style={styles.mainTitle}>HenoTrack</Text>
+            <Text style={styles.subtitle}>Monitoreo y Conservación Fitosanitaria</Text>
+            
+            {isDesktop && (
+              <View style={styles.desktopDecorationBox}>
+                <Text style={styles.desktopDecorationText}>
+                  Sistema de geolocalización, captura y evaluación de Tillandsia recurvata en la red ambiental universitaria.
+                </Text>
+              </View>
+            )}
+          </View>
 
-          {mode === 'login' ? (
+          {/* Form Container Column */}
+          <View style={[styles.formColumn, isDesktop && styles.desktopFormColumn]}>
+            
+            {/* Custom Segmented Pill Tab Toggle */}
+            <View style={styles.segmentedToggleContainer}>
+              <TouchableOpacity 
+                style={[styles.segmentedTab, mode === 'login' && styles.segmentedTabActive]} 
+                onPress={() => setMode('login')}
+              >
+                <Text style={[styles.segmentedTabText, mode === 'login' && styles.segmentedTabTextActive]}>
+                  Iniciar Sesión
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.segmentedTab, mode === 'activate' && styles.segmentedTabActive]} 
+                onPress={() => setMode('activate')}
+              >
+                <Text style={[styles.segmentedTabText, mode === 'activate' && styles.segmentedTabTextActive]}>
+                  Activar Cuenta
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-            <>
-              <Text style={styles.formLegend}>Te damos la bienvenida</Text>
-
-              {loginError ? (
-                <View style={styles.errorBox}>
-                  <Ionicons name="alert-circle" size={18} color="#C75B52" style={{ marginRight: 6 }} />
-                  <Text style={styles.errorText}>{loginError}</Text>
+            {/* Form Card */}
+            <View style={styles.cardForm}>
+              {preLoginPhrase ? (
+                <View style={styles.phraseBubble}>
+                  <Ionicons name="sunny-outline" size={16} color={colors.primary} style={{ marginRight: 6 }} />
+                  <Text style={styles.phraseText}>{preLoginPhrase}</Text>
                 </View>
               ) : null}
 
-              <TextInput
-                label="Correo Institucional"
-                placeholder="usuario@uttt.edu.mx"
-                value={email}
-                onChangeText={setEmail}
-                mode="outlined"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                outlineStyle={styles.inputOutline}
-                style={styles.input}
-                activeOutlineColor="#176B52"
-                left={<TextInput.Icon icon={() => <Ionicons name="mail-outline" size={20} color="#687A74" />} />}
-              />
+              {mode === 'login' ? (
+                <>
+                  <Text style={styles.formLegend}>Te damos la bienvenida</Text>
 
-              <TextInput
-                label="Contraseña"
-                placeholder="Tu contrasena"
-                value={password}
-                onChangeText={setPassword}
-                mode="outlined"
-                secureTextEntry
-                outlineStyle={styles.inputOutline}
-                style={styles.input}
-                activeOutlineColor="#176B52"
-                left={<TextInput.Icon icon={() => <Ionicons name="lock-closed-outline" size={20} color="#687A74" />} />}
-              />
+                  {loginError ? (
+                    <View style={styles.errorBox}>
+                      <Ionicons name="alert-circle" size={18} color={colors.errorBorder} style={{ marginRight: 6 }} />
+                      <Text style={styles.errorText}>{loginError}</Text>
+                    </View>
+                  ) : null}
 
-              <Button 
-                mode="contained" 
-                onPress={handleLogin} 
-                loading={loginLoading}
-                disabled={loginLoading || !email.trim() || !password}
-                buttonColor="#176B52"
-                style={styles.button}
-                labelStyle={styles.buttonLabel}
-                contentStyle={{ paddingVertical: 10 }}
-                icon={() => <Ionicons name="log-in-outline" size={20} color="#FFFFFF" />}
+                  <TextInput
+                    label="Correo Institucional"
+                    placeholder="usuario@uttt.edu.mx"
+                    value={email}
+                    onChangeText={setEmail}
+                    mode="outlined"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    outlineStyle={styles.inputOutline}
+                    style={styles.input}
+                    activeOutlineColor={colors.focusGreen}
+                    outlineColor={colors.borderLight}
+                    left={<TextInput.Icon icon={() => <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />} />}
+                  />
+
+                  <TextInput
+                    label="Contraseña"
+                    placeholder="Tu contraseña"
+                    value={password}
+                    onChangeText={setPassword}
+                    mode="outlined"
+                    secureTextEntry
+                    outlineStyle={styles.inputOutline}
+                    style={styles.input}
+                    activeOutlineColor={colors.focusGreen}
+                    outlineColor={colors.borderLight}
+                    left={<TextInput.Icon icon={() => <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />} />}
+                  />
+
+                  <Button 
+                    mode="contained" 
+                    onPress={handleLogin} 
+                    loading={loginLoading}
+                    disabled={loginLoading || !email.trim() || !password}
+                    buttonColor={colors.primary}
+                    style={styles.button}
+                    labelStyle={styles.buttonLabel}
+                    contentStyle={{ paddingVertical: 10 }}
+                    icon={() => <Ionicons name="log-in-outline" size={20} color={colors.mainSurface} />}
+                  >
+                    Iniciar Sesión
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.formLegend}>Registro de Estudiante</Text>
+
+                  <TextInput
+                    label="Código de Activación *"
+                    placeholder="Código entregado por tu encargado"
+                    value={activationCode}
+                    onChangeText={setActivationCode}
+                    mode="outlined"
+                    autoCapitalize="characters"
+                    outlineStyle={styles.inputOutline}
+                    style={styles.input}
+                    activeOutlineColor={colors.focusGreen}
+                    outlineColor={colors.borderLight}
+                    left={<TextInput.Icon icon={() => <Ionicons name="key-outline" size={20} color={colors.textSecondary} />} />}
+                  />
+
+                  <TextInput
+                    label="Nombre Completo *"
+                    placeholder="Nombre(s) y Apellidos"
+                    value={studentName}
+                    onChangeText={setStudentName}
+                    mode="outlined"
+                    outlineStyle={styles.inputOutline}
+                    style={styles.input}
+                    activeOutlineColor={colors.focusGreen}
+                    outlineColor={colors.borderLight}
+                    left={<TextInput.Icon icon={() => <Ionicons name="person-outline" size={20} color={colors.textSecondary} />} />}
+                  />
+
+                  <TextInput
+                    label="Matrícula *"
+                    placeholder="Tu matrícula institucional"
+                    value={enrollment}
+                    onChangeText={setEnrollment}
+                    mode="outlined"
+                    outlineStyle={styles.inputOutline}
+                    style={styles.input}
+                    activeOutlineColor={colors.focusGreen}
+                    outlineColor={colors.borderLight}
+                    left={<TextInput.Icon icon={() => <Ionicons name="card-outline" size={20} color={colors.textSecondary} />} />}
+                  />
+
+                  <TextInput
+                    label="Correo Institucional *"
+                    placeholder="correo@uttt.edu.mx"
+                    value={email}
+                    onChangeText={setEmail}
+                    mode="outlined"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    outlineStyle={styles.inputOutline}
+                    style={styles.input}
+                    activeOutlineColor={colors.focusGreen}
+                    outlineColor={colors.borderLight}
+                    left={<TextInput.Icon icon={() => <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />} />}
+                  />
+
+                  <TextInput
+                    label="Contraseña *"
+                    placeholder="Crea una contraseña"
+                    value={password}
+                    onChangeText={setPassword}
+                    mode="outlined"
+                    secureTextEntry
+                    outlineStyle={styles.inputOutline}
+                    style={styles.input}
+                    activeOutlineColor={colors.focusGreen}
+                    outlineColor={colors.borderLight}
+                    left={<TextInput.Icon icon={() => <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />} />}
+                  />
+
+                  <Button 
+                    mode="contained" 
+                    onPress={handleActivate} 
+                    loading={activateLoading}
+                    disabled={activateLoading || !activationCode.trim()}
+                    buttonColor={colors.primary}
+                    style={styles.button}
+                    labelStyle={styles.buttonLabel}
+                    contentStyle={{ paddingVertical: 10 }}
+                    icon={() => <Ionicons name="checkmark-circle-outline" size={20} color={colors.mainSurface} />}
+                  >
+                    Activar Cuenta
+                  </Button>
+                </>
+              )}
+
+              {/* Quick link back to info onboarding */}
+              <TouchableOpacity 
+                onPress={() => { setShowInfo(true); setSlideIndex(0); }} 
+                style={styles.backInfoBtn}
+                activeOpacity={0.7}
               >
-                Iniciar Sesion
-              </Button>
-            </>
-          ) : (
-            <>
-              <Text style={styles.formLegend}>Registro de Estudiante</Text>
+                <Ionicons name="information-circle-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+                <Text style={styles.backInfoText}>Ver información del Heno Motita</Text>
+              </TouchableOpacity>
+            </View>
 
-              <TextInput
-                label="Codigo de Activacion *"
-                placeholder="Codigo entregado por tu encargado"
-                value={activationCode}
-                onChangeText={setActivationCode}
-                mode="outlined"
-                autoCapitalize="characters"
-                outlineStyle={styles.inputOutline}
-                style={styles.input}
-                activeOutlineColor="#176B52"
-                left={<TextInput.Icon icon={() => <Ionicons name="key-outline" size={20} color="#687A74" />} />}
-              />
-
-              <TextInput
-                label="Nombre Completo *"
-                placeholder="Nombre(s) y Apellidos"
-                value={studentName}
-                onChangeText={setStudentName}
-                mode="outlined"
-                outlineStyle={styles.inputOutline}
-                style={styles.input}
-                activeOutlineColor="#176B52"
-                left={<TextInput.Icon icon={() => <Ionicons name="person-outline" size={20} color="#687A74" />} />}
-              />
-
-              <TextInput
-                label="Matricula *"
-                placeholder="Tu matricula institucional"
-                value={enrollment}
-                onChangeText={setEnrollment}
-                mode="outlined"
-                outlineStyle={styles.inputOutline}
-                style={styles.input}
-                activeOutlineColor="#176B52"
-                left={<TextInput.Icon icon={() => <Ionicons name="card-outline" size={20} color="#687A74" />} />}
-              />
-
-              <TextInput
-                label="Correo Institucional *"
-                placeholder="correo@uttt.edu.mx"
-                value={email}
-                onChangeText={setEmail}
-                mode="outlined"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                outlineStyle={styles.inputOutline}
-                style={styles.input}
-                activeOutlineColor="#176B52"
-                left={<TextInput.Icon icon={() => <Ionicons name="mail-outline" size={20} color="#687A74" />} />}
-              />
-
-              <TextInput
-                label="Contraseña *"
-                placeholder="Crea una contrasena"
-                value={password}
-                onChangeText={setPassword}
-                mode="outlined"
-                secureTextEntry
-                outlineStyle={styles.inputOutline}
-                style={styles.input}
-                activeOutlineColor="#176B52"
-                left={<TextInput.Icon icon={() => <Ionicons name="lock-closed-outline" size={20} color="#687A74" />} />}
-              />
-
-              <Button 
-                mode="contained" 
-                onPress={handleActivate} 
-                loading={activateLoading}
-                disabled={activateLoading || !activationCode.trim()}
-                buttonColor="#176B52"
-                style={styles.button}
-                labelStyle={styles.buttonLabel}
-                contentStyle={{ paddingVertical: 10 }}
-                icon={() => <Ionicons name="checkmark-circle-outline" size={20} color="#FFFFFF" />}
-              >
-                Activar Cuenta
-              </Button>
-            </>
-          )}
-
-          {/* Quick link back to info onboarding */}
-          <TouchableOpacity 
-            onPress={() => { setShowInfo(true); setSlideIndex(0); }} 
-            style={styles.backInfoBtn}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="information-circle-outline" size={18} color="#176B52" style={{ marginRight: 6 }} />
-            <Text style={styles.backInfoText}>Ver informacion del Heno Motita</Text>
-          </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -500,153 +533,215 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 40,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xxxl,
     alignItems: 'center',
+  },
+  mainWrapper: {
+    width: '100%',
+    maxWidth: layout.contentMaxWidthUnauth,
+    alignItems: 'center',
+  },
+  desktopMainWrapper: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    justifyContent: 'center',
+    gap: spacing.xxxl,
   },
   headerBlock: {
     alignItems: 'center',
-    marginBottom: 28,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#176B52',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#103F32',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
+    paddingVertical: spacing.xl,
+    width: '100%',
+  },
+  desktopHeaderBlock: {
+    flex: 1,
+    minWidth: layout.desktopLoginMinCols.left,
+    backgroundColor: colors.headerGreen,
+    borderRadius: borderRadius.modal,
+    padding: spacing.xxxl,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    shadowColor: colors.headerGreen,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
     elevation: 4,
   },
+  iconCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: borderRadius.circle,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    shadowColor: colors.headerGreen,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
   institutionCode: {
-    color: '#687A74',
-    fontWeight: '800',
+    fontFamily: fonts.base,
+    color: colors.textSecondaryAlt,
+    fontWeight: '650',
     letterSpacing: 1.5,
     fontSize: 11,
-    marginBottom: 6,
+    textTransform: 'uppercase',
+    marginBottom: spacing.xs,
   },
-  title: {
-    fontWeight: '900',
+  mainTitle: {
+    fontFamily: fonts.display,
+    fontWeight: '600',
     textAlign: 'center',
-    color: '#163029',
-    fontSize: 34,
-    letterSpacing: 0.5,
+    color: colors.headerGreen,
+    fontSize: 44, // clamp fallback
+    letterSpacing: -1.2, // -.06em
+    lineHeight: 44 * 0.95,
   },
   subtitle: {
+    fontFamily: fonts.base,
     textAlign: 'center',
-    color: '#687A74',
-    fontWeight: '600',
+    color: colors.textSecondary,
+    fontWeight: '500',
+    fontSize: 14,
+    marginTop: spacing.xs,
+  },
+  desktopDecorationBox: {
+    marginTop: spacing.xxxl,
+    backgroundColor: colors.primaryHover,
+    padding: spacing.lg,
+    borderRadius: borderRadius.input,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.accentGreen,
+  },
+  desktopDecorationText: {
+    fontFamily: fonts.base,
     fontSize: 13,
-    marginTop: 4,
+    color: colors.textOnGreen,
+    lineHeight: 20,
+  },
+  formColumn: {
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  desktopFormColumn: {
+    flex: 1,
+    minWidth: layout.desktopLoginMinCols.right,
   },
   segmentedToggleContainer: {
     flexDirection: 'row',
-    backgroundColor: '#E2ECE7',
-    borderRadius: 30,
+    backgroundColor: colors.secondaryButton,
+    borderRadius: borderRadius.pill,
     padding: 4,
     width: '100%',
-    maxWidth: 380,
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   segmentedTab: {
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 26,
+    borderRadius: borderRadius.pill,
   },
   segmentedTabActive: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#103F32',
+    backgroundColor: colors.mainSurface,
+    shadowColor: colors.headerGreen,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
   segmentedTabText: {
+    fontFamily: fonts.base,
     fontSize: 13,
-    fontWeight: '700',
-    color: '#687A74',
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
   segmentedTabTextActive: {
-    color: '#176B52',
-    fontWeight: '800',
+    color: colors.primary,
+    fontWeight: '650',
   },
   cardForm: {
     width: '100%',
-    maxWidth: 400,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 28,
-    paddingHorizontal: 24,
-    paddingVertical: 28,
-    shadowColor: '#103F32',
+    backgroundColor: colors.mainSurface,
+    borderRadius: borderRadius.modal,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.xxxl,
+    shadowColor: colors.headerGreen,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.06,
     shadowRadius: 20,
     elevation: 5,
     borderWidth: 1,
-    borderColor: '#E2EBE6',
+    borderColor: colors.borderLight,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.accentGreen,
   },
   formLegend: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#163029',
-    marginBottom: 20,
+    fontFamily: fonts.display,
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.headerGreen,
+    marginBottom: spacing.xl,
     textAlign: 'center',
   },
   errorBox: {
-    backgroundColor: '#FFF0EE',
-    padding: 12,
-    borderRadius: 14,
+    backgroundColor: colors.errorBg,
+    padding: spacing.md,
+    borderRadius: borderRadius.input,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    borderLeftWidth: 3,
-    borderLeftColor: '#C75B52',
+    marginBottom: spacing.lg,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.errorBorder,
   },
   errorText: {
-    color: '#C75B52',
+    fontFamily: fonts.base,
+    color: colors.errorText,
     fontSize: 13,
     fontWeight: '600',
     flex: 1,
   },
   input: {
-    marginBottom: 16,
-    backgroundColor: '#F7FAF8',
+    marginBottom: spacing.lg,
+    backgroundColor: colors.panelSurface,
     fontSize: 14,
+    fontFamily: fonts.base,
   },
   inputOutline: {
-    borderRadius: 14,
-    borderColor: '#E2EBE6',
+    borderRadius: borderRadius.input,
+    borderColor: colors.borderLight,
   },
   button: {
-    borderRadius: 14,
-    marginTop: 10,
+    borderRadius: borderRadius.button,
+    marginTop: spacing.sm,
   },
   buttonLabel: {
+    fontFamily: fonts.base,
     fontSize: 15,
-    fontWeight: '800',
-    color: '#FFFFFF',
+    fontWeight: '650',
+    color: colors.mainSurface,
   },
+
   // Interactive Onboarding Layout
   infoWrapper: {
     flex: 1,
-    backgroundColor: '#F4F8F5',
+    backgroundColor: colors.background,
   },
   progressBarWrapper: {
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.xxl,
     paddingTop: 48,
-    paddingBottom: 8,
-    backgroundColor: '#FFFFFF',
+    paddingBottom: spacing.sm,
+    backgroundColor: colors.mainSurface,
     borderBottomWidth: 1,
-    borderColor: '#DCE7E1',
+    borderColor: colors.borderLight,
   },
   progressBar: {
     height: 6,
@@ -656,12 +751,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: spacing.md,
   },
   slideCounterText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#176B52',
+    fontFamily: fonts.base,
+    fontSize: 12.5,
+    fontWeight: '650',
+    color: colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1.1,
   },
   dotsRow: {
     flexDirection: 'row',
@@ -673,20 +771,19 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   activeDot: {
-    backgroundColor: '#176B52',
+    backgroundColor: colors.primary,
     width: 20,
   },
   inactiveDot: {
-    backgroundColor: '#DCE7E1',
+    backgroundColor: colors.borderLight,
   },
   infoScrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.lg,
     paddingBottom: 100,
   },
   infoContainer: {
-    maxWidth: 500,
     alignSelf: 'center',
     width: '100%',
   },
@@ -695,113 +792,124 @@ const styles = StyleSheet.create({
   },
   infoHeader: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   infoIconCircle: {
     width: 68,
     height: 68,
     borderRadius: 34,
-    backgroundColor: '#176B52',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
-    shadowColor: '#000',
+    marginBottom: spacing.md,
+    shadowColor: colors.headerGreen,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 2,
   },
   infoTitle: {
-    fontWeight: '900',
+    fontFamily: fonts.display,
+    fontWeight: '600',
     textAlign: 'center',
-    color: '#163029',
-    fontSize: 26,
+    color: colors.headerGreen,
+    fontSize: 28,
   },
   infoSubtitle: {
+    fontFamily: fonts.base,
     textAlign: 'center',
-    color: '#687A74',
-    fontWeight: '600',
-    marginTop: 6,
-    paddingHorizontal: 16,
-    lineHeight: 18,
+    color: colors.textSecondary,
+    fontWeight: '500',
+    marginTop: spacing.xs,
+    paddingHorizontal: spacing.lg,
+    lineHeight: 20,
   },
   badgeRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 8,
-    marginBottom: 16,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   infoChip: {
-    backgroundColor: '#E2ECE7',
+    backgroundColor: colors.secondaryButton,
   },
   infoChipText: {
-    color: '#163029',
+    fontFamily: fonts.base,
+    color: colors.highlightText,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '650',
   },
   heroImage: {
     width: '100%',
     height: 200,
-    borderRadius: 24,
+    borderRadius: borderRadius.modal,
     borderWidth: 1,
-    borderColor: '#DCE7E1',
-    marginBottom: 16,
+    borderColor: colors.borderLight,
+    marginBottom: spacing.lg,
   },
   infoCard: {
-    borderRadius: 20,
+    borderRadius: borderRadius.card,
     borderWidth: 1,
-    borderColor: '#DCE7E1',
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.borderLight,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.accentGreen,
+    backgroundColor: colors.mainSurface,
     elevation: 1,
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
   },
   dangerCard: {
-    borderColor: '#F9DCDA',
-    backgroundColor: '#FFF8F7',
+    borderColor: colors.errorBorder,
+    backgroundColor: colors.errorBg,
+    borderLeftColor: colors.errorBorder,
   },
   solutionCard: {
-    borderColor: '#DCECE4',
-    backgroundColor: '#F4FAF7',
+    borderColor: colors.borderLight,
+    backgroundColor: colors.panelSurface,
+    borderLeftColor: colors.accentGreen,
   },
   cardHeader: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#163029',
-    marginBottom: 12,
+    fontFamily: fonts.display,
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.headerGreen,
+    marginBottom: spacing.md,
   },
   cardBody: {
+    fontFamily: fonts.base,
     fontSize: 14,
-    color: '#4B5B56',
-    lineHeight: 20,
+    color: colors.textPrimary,
+    lineHeight: 22,
   },
   bulletRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 14,
+    marginBottom: spacing.md,
   },
   bulletIcon: {
-    marginRight: 10,
+    marginRight: spacing.sm,
     marginTop: 2,
   },
   bulletTextWrapper: {
     flex: 1,
   },
   bulletTitle: {
+    fontFamily: fonts.base,
     fontSize: 14,
-    fontWeight: '800',
-    color: '#163029',
+    fontWeight: '650',
+    color: colors.textPrimary,
     marginBottom: 2,
   },
   linkContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 16,
-    gap: 8,
+    marginVertical: spacing.lg,
+    gap: spacing.sm,
   },
   linkText: {
-    color: '#176B52',
-    fontWeight: '800',
+    fontFamily: fonts.base,
+    color: colors.primary,
+    fontWeight: '650',
     fontSize: 14,
     textDecorationLine: 'underline',
   },
@@ -811,16 +919,16 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 76,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.mainSurface,
     borderTopWidth: 1,
-    borderColor: '#DCE7E1',
+    borderColor: colors.borderLight,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.xl,
   },
   navButton: {
-    borderRadius: 14,
+    borderRadius: borderRadius.button,
     flex: 1,
     marginHorizontal: 6,
   },
@@ -828,31 +936,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
-    paddingVertical: 8,
+    marginTop: spacing.xl,
+    paddingVertical: spacing.sm,
   },
   backInfoText: {
-    color: '#176B52',
-    fontWeight: '800',
+    fontFamily: fonts.base,
+    color: colors.primary,
+    fontWeight: '650',
     fontSize: 13,
   },
   phraseBubble: {
-    backgroundColor: '#EDF6F1',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
+    backgroundColor: colors.secondaryButton,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.input,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 18,
-    borderLeftWidth: 3,
-    borderLeftColor: '#176B52',
+    marginBottom: spacing.lg,
+    borderLeftWidth: layout.panelAccentBorderWidth,
+    borderLeftColor: colors.primary,
   },
   phraseText: {
-    color: '#163029',
+    fontFamily: fonts.base,
+    color: colors.highlightText,
     fontSize: 12.5,
-    fontWeight: '600',
+    fontWeight: '500',
     flex: 1,
     lineHeight: 16,
   },
 });
-
