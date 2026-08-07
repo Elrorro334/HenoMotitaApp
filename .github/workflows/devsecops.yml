@@ -52,12 +52,9 @@ jobs:
         run: npm ci
 
       - name: Trivy Vulnerability Scanner (Strict FS Scan)
-        uses: aquasecurity/trivy-action@v0.30.0
+        uses: docker://aquasecurity/trivy:latest
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          severity: 'HIGH,CRITICAL'
+          args: fs --severity HIGH,CRITICAL .
 
   # -------------------------------------------------------------------
   # 3. STATIC APPLICATION SECURITY TESTING (SAST) - STRICT CODE SCAN
