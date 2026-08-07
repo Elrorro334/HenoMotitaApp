@@ -24,42 +24,51 @@ export default function CameraScreen() {
   const [flash, setFlash] = useState('off'); // 'off' | 'on' | 'auto'
   const [showGrid, setShowGrid] = useState(true);
 
+  // Ref-based subscriber so cleanup is always tied to the latest instance
+  const locationSubscriberRef = useRef(null);
+
   useEffect(() => {
-    let subscriber = null;
+    let isMounted = true;
 
     async function initLocation() {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          setLocationError('Permiso GPS no concedido');
+          if (isMounted) setLocationError('Permiso GPS no concedido');
           return;
         }
 
         const initialLoc = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
-        setLocation(initialLoc);
+        if (isMounted) setLocation(initialLoc);
 
-        subscriber = await Location.watchPositionAsync(
+        const subscriber = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.High,
             timeInterval: 2000,
             distanceInterval: 1,
           },
           (newLoc) => {
-            setLocation(newLoc);
+            if (isMounted) setLocation(newLoc);
           }
         );
+
+        // Store on the ref so the cleanup below always removes the right subscriber
+        locationSubscriberRef.current = subscriber;
       } catch (err) {
-        setLocationError('Buscando satélites GPS...');
+        if (isMounted) setLocationError('Buscando satélites GPS...');
+        if (__DEV__) console.warn('[CameraScreen] Location error:', err);
       }
     }
 
     initLocation();
 
     return () => {
-      if (subscriber) {
-        subscriber.remove();
+      isMounted = false;
+      if (locationSubscriberRef.current) {
+        locationSubscriberRef.current.remove();
+        locationSubscriberRef.current = null;
       }
     };
   }, []);

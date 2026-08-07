@@ -26,10 +26,13 @@ export default function ResultsScreen() {
   const longitude = parseFloat(params.lng) || -99.3407;
   const accuracy = params.accuracy || '3';
 
-  // Step 2: Evaluation by Thirds (0 = Sin presencia, 1 = Ligera, 2 = Severa)
+  // Step 2: Evaluation by Thirds — values locked to Hawksworth range [0, 2]
   const [upperThird, setUpperThird] = useState(2);
   const [middleThird, setMiddleThird] = useState(1);
   const [lowerThird, setLowerThird] = useState(2);
+
+  /** Clamp Hawksworth score to the valid discrete range {0, 1, 2} */
+  const clampScore = (v) => Math.min(2, Math.max(0, Number(v) || 0));
 
   const totalScore = upperThird + middleThird + lowerThird;
 
@@ -71,7 +74,8 @@ export default function ResultsScreen() {
   const severity = getSeverityInfo(totalScore);
 
   const handleSaveToBackend = async () => {
-    if (!treeCode.trim()) {
+    const cleanTreeCode = treeCode.trim().substring(0, 100);
+    if (!cleanTreeCode) {
       Alert.alert('Campo Requerido', 'Por favor ingresa el código identificador del árbol.');
       return;
     }
@@ -81,14 +85,14 @@ export default function ResultsScreen() {
 
     if (!crewId) {
       Alert.alert('Cuadrilla No Asignada', 'No tienes una cuadrilla activa. Se almacenará en la cola offline.');
-      await saveOffline();
+      await saveOffline(cleanTreeCode);
       setSaving(false);
       return;
     }
 
     try {
       let treeId = null;
-      const targetCode = treeCode.trim();
+      const targetCode = cleanTreeCode;
 
       // 1. Try creating or resolving existing tree
       try {
@@ -120,10 +124,10 @@ export default function ResultsScreen() {
       // 2. Create Observation in backend
       const obsRes = await createObservation(treeId, {
         observationDate: new Date().toISOString(),
-        upperThirdScore: upperThird,
-        middleThirdScore: middleThird,
-        lowerThirdScore: lowerThird,
-        notes: comments.trim() ? comments.trim() : undefined,
+        upperThirdScore:  clampScore(upperThird),
+        middleThirdScore: clampScore(middleThird),
+        lowerThirdScore:  clampScore(lowerThird),
+        notes: comments.trim() ? comments.trim().substring(0, 1000) : undefined,
       });
 
       const obsId = obsRes?.id || obsRes?._id || obsRes?.observation?.id || obsRes?.observation?._id;
@@ -142,28 +146,50 @@ export default function ResultsScreen() {
       );
 
     } catch (error) {
-      console.warn('Error al guardar en backend, guardando offline:', error);
-      await saveOffline();
+      if (__DEV__) console.warn('[ResultsScreen] Error saving to backend:', error);
+
+      const errMsg = error?.message || 'Error de conexión con el servidor.';
+
+      Alert.alert(
+        'No se pudo subir al servidor',
+        `${errMsg}\n\n¿Qué deseas hacer?`,
+        [
+          {
+            text: 'Guardar Offline',
+            style: 'default',
+            onPress: () => saveOffline(cleanTreeCode),
+          },
+          {
+            text: 'Reintentar',
+            style: 'cancel',
+            onPress: () => {
+              setSaving(false);
+              handleSaveToBackend();
+            },
+          },
+        ]
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  const saveOffline = async () => {
+  const saveOffline = async (overrideCode) => {
+    const code = overrideCode || treeCode.trim() || `ARB-UTTT-${Math.floor(Math.random() * 1000)}`;
     try {
       await savePendingInspection({
-        treeCode: treeCode.trim() || `ARB-UTTT-${Math.floor(Math.random() * 1000)}`,
-        species: species.trim() || 'Mezquite',
-        municipality: municipality.trim() || 'Tula de Allende',
-        zone: zone.trim() || 'Campus UTTT',
+        treeCode: code,
+        species: species.trim().substring(0, 100) || 'Mezquite',
+        municipality: municipality.trim().substring(0, 100) || 'Tula de Allende',
+        zone: zone.trim().substring(0, 100) || 'Campus UTTT',
         latitude,
         longitude,
         accuracy,
-        upperThirdScore: upperThird,
-        middleThirdScore: middleThird,
-        lowerThirdScore: lowerThird,
-        scale: totalScore,
-        comments: comments.trim(),
+        upperThirdScore:  clampScore(upperThird),
+        middleThirdScore: clampScore(middleThird),
+        lowerThirdScore:  clampScore(lowerThird),
+        scale: clampScore(upperThird) + clampScore(middleThird) + clampScore(lowerThird),
+        comments: comments.trim().substring(0, 1000),
         imageUri,
       });
 

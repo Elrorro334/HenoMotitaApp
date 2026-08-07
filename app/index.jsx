@@ -29,15 +29,16 @@ export default function LoginScreen() {
   const { loginUser } = useAuth();
 
   const handleLogin = async () => {
-    if (!email.trim() || !password) return;
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !password) return;
     setLoginError('');
     setLoginLoading(true);
 
     try {
-      await loginUser(email.trim(), password);
+      await loginUser(cleanEmail, password);
       router.replace('/(tabs)/dashboard');
     } catch (error) {
-      console.error('HenoTrack login error:', error);
+      if (__DEV__) console.error('[LoginScreen] login error:', error);
       setLoginError(error.message || 'Contraseña incorrecta o cuenta no registrada.');
     } finally {
       setLoginLoading(false);
@@ -47,8 +48,8 @@ export default function LoginScreen() {
   // Activation logic moved to web
 
   const openMoreInfo = () => {
-    Linking.openURL('http://www.henomotita.mx/').catch((err) =>
-      Alert.alert('Error', 'No se pudo abrir el enlace: ' + err.message)
+    Linking.openURL('https://www.henomotita.mx/').catch(() =>
+      Alert.alert('Error', 'No se pudo abrir el enlace de información.')
     );
   };
 
@@ -312,10 +313,12 @@ export default function LoginScreen() {
             <TextInput
               placeholder="usuario@uttt.edu.mx"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => setEmail(text.trim().toLowerCase())}
               mode="outlined"
               keyboardType="email-address"
               autoCapitalize="none"
+              autoComplete="email"
+              textContentType="emailAddress"
               outlineStyle={styles.cleanOutline}
               style={styles.cleanInput}
               activeOutlineColor={colors.primary}
@@ -329,6 +332,8 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               mode="outlined"
               secureTextEntry
+              autoComplete="current-password"
+              textContentType="password"
               outlineStyle={styles.cleanOutline}
               style={styles.cleanInput}
               activeOutlineColor={colors.primary}

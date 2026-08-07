@@ -37,7 +37,8 @@
         {
           "locationForegroundPermission": "Permite obtener las coordenadas GPS del árbol al momento de la evaluación."
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

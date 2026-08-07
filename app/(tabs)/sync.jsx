@@ -69,30 +69,31 @@ export default function SyncScreen() {
   const handleSaveEdits = async () => {
     if (!selectedItem) return;
 
-    const totalScale = (editLowerScore || 0) + (editMiddleScore || 0) + (editUpperScore || 0);
+    /** Clamp Hawksworth score to {0, 1, 2} */
+    const clamp = (v) => Math.min(2, Math.max(0, Number(v) || 0));
+
+    const totalScale = clamp(editLowerScore) + clamp(editMiddleScore) + clamp(editUpperScore);
     const updatedFields = {
-      treeCode: editTreeCode.trim() || `ARB-UTTT-${Math.floor(Math.random() * 1000)}`,
-      species: editSpecies.trim() || 'Mezquite',
-      lowerThirdScore: editLowerScore,
-      middleThirdScore: editMiddleScore,
-      upperThirdScore: editUpperScore,
-      scale: totalScale,
-      comments: editComments,
+      treeCode:        editTreeCode.trim().substring(0, 100) || `ARB-UTTT-${Math.floor(Math.random() * 1000)}`,
+      species:         editSpecies.trim().substring(0, 100) || 'Mezquite',
+      lowerThirdScore: clamp(editLowerScore),
+      middleThirdScore: clamp(editMiddleScore),
+      upperThirdScore: clamp(editUpperScore),
+      scale:           totalScale,
+      comments:        editComments.trim().substring(0, 1000),
     };
 
     try {
       await updatePendingItem(selectedItem.id, updatedFields);
       await loadQueue();
 
-      setSelectedItem((prev) => ({
-        ...prev,
-        ...updatedFields,
-      }));
+      setSelectedItem((prev) => ({ ...prev, ...updatedFields }));
 
       setIsEditing(false);
       setSnackbarMsg('¡Reporte offline actualizado correctamente!');
       setSnackbarVisible(true);
     } catch (error) {
+      if (__DEV__) console.error('[SyncScreen] Error saving edits:', error);
       Alert.alert('Error', 'No se pudieron guardar los cambios en el reporte offline.');
     }
   };
@@ -207,7 +208,7 @@ export default function SyncScreen() {
                 await removePendingItem(item.id);
                 successCount++;
               } catch (err) {
-                console.warn('Error syncing item:', item.id, err);
+                if (__DEV__) console.warn('[SyncScreen] Error syncing item:', item.id, err);
                 errorCount++;
               }
             }
